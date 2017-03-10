@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="Probe.ino" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="__vm\.Probe.vsarduino.h" />
+    <ClInclude Include="Hardware.h" />
+    <ClInclude Include="Protocol.h" />
+    <ClInclude Include="Upstream.h" />
+    <ClInclude Include="ext\DAC_MCP49xx.h">
+      <Filter>External libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\MemoryFree.h">
+      <Filter>External libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\TimerOne.h">
+      <Filter>External libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\config\known_16bit_timers.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Hardware.cpp" />
+    <ClCompile Include="Upstream.cpp" />
+    <ClCompile Include="ext\DAC_MCP49xx.cpp">
+      <Filter>External libraries</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\MemoryFree.cpp">
+      <Filter>External libraries</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\TimerOne.cpp">
+      <Filter>External libraries</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="External libraries">
+      <UniqueIdentifier>{e5103937-05e2-4ef1-b846-8e49d445d2e0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
