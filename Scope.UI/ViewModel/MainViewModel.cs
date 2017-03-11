@@ -201,7 +201,7 @@ namespace Scope.ViewModel
             this.dac1Config = new LineConfiguration { Name = "DAC1", Color = Colors.Green, Unit = "V" };
             this.adc0Config = new LineConfiguration { Name = "ADC0", Color = Colors.Red, Unit = "V" };
             this.adc1Config = new LineConfiguration { Name = "ADC1", Color = Colors.Orange, Unit = "V" };
-            this.adc2Config = new LineConfiguration { Name = "ADC2", Color = Colors.Yellow, Unit = "V" };
+            this.adc2Config = new LineConfiguration { Name = "ADC2", Color = Colors.Violet, Unit = "V" };
             this.LineConfigurations.Add(this.dac0Config);
             this.LineConfigurations.Add(this.dac1Config);
             this.LineConfigurations.Add(this.adc0Config);

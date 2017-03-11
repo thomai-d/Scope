@@ -21,7 +21,6 @@ namespace Scope.Controls.Visualization
     /// <summary>
     /// Visualizes a stream of data.
     /// </summary>
-    [TemplatePart(Name = "PART_RenderArea", Type = typeof(Visual))]
     public class StreamGraph : PixelCanvas
     {
         public static readonly DependencyProperty DataStreamsProperty = DependencyProperty.Register("DataStreams", typeof(ICollection<IBufferedStream<double>>), typeof(StreamGraph), new PropertyMetadata(null));
@@ -29,6 +28,8 @@ namespace Scope.Controls.Visualization
         public static readonly DependencyProperty GridColorProperty = DependencyProperty.Register("GridColor", typeof(Color), typeof(StreamGraph), new PropertyMetadata(Color.FromRgb(30, 30, 30)));
         public static readonly DependencyProperty MaxProperty = DependencyProperty.Register("Max", typeof(double), typeof(StreamGraph), new PropertyMetadata(5.1));
         public static readonly DependencyProperty MinProperty = DependencyProperty.Register("Min", typeof(double), typeof(StreamGraph), new PropertyMetadata(-0.1));
+        public static readonly DependencyPropertyKey AnnotationsPropertyKey;
+        public static readonly DependencyProperty AnnotationsProperty;
 
         // Fields.
 
@@ -42,6 +43,9 @@ namespace Scope.Controls.Visualization
         static StreamGraph()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(StreamGraph), new FrameworkPropertyMetadata(typeof(StreamGraph)));
+
+            AnnotationsPropertyKey = DependencyProperty.RegisterReadOnly("Annotations", typeof(List<Annotation>), typeof(StreamGraph), new PropertyMetadata(null));
+            AnnotationsProperty = AnnotationsPropertyKey.DependencyProperty;
         }
 
         // Properties.
@@ -74,6 +78,12 @@ namespace Scope.Controls.Visualization
         {
             get { return (IList<LineConfiguration>)GetValue(LineConfigurationsProperty); }
             set { SetValue(LineConfigurationsProperty, value); }
+        }
+
+        public List<Annotation> Annotations
+        {
+            get { return (List<Annotation>)GetValue(AnnotationsProperty); }
+            private set { SetValue(AnnotationsPropertyKey, value); }
         }
 
         // Callbacks.
@@ -162,15 +172,24 @@ namespace Scope.Controls.Visualization
         private void RecalculateGrid()
         {
             var range = this.Max - this.Min;
-            var step = Math.Pow(10, Math.Floor(Math.Log10(range)));
+            var decimals = Math.Floor(Math.Log10(range));
+            var step = Math.Pow(10, decimals);
 
+            var annotations = new List<Annotation>();
             var gridLines = new List<Tuple<int, double>>();
             for (double y = Round(this.Min, step); y < this.Max; y += step)
             {
-                gridLines.Add(new Tuple<int, double>(this.ValueToY(y), y));
+                var top = this.ValueToY(y);
+                gridLines.Add(new Tuple<int, double>(top, y));
+
+                if (y != 0)
+                {
+                    annotations.Add(new Annotation { X = 3, Y = top, Text = $"{y} V" });
+                }
             }
 
             this.verticalGridLines = gridLines.ToArray();
+            this.Annotations = annotations;
         }
 
         private static double Round(double value, double step)

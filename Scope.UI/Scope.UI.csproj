@@ -63,6 +63,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="Controls\Visualization\Annotation.cs" />
     <Compile Include="Tools\Performance.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Page Include="MainWindow.xaml">

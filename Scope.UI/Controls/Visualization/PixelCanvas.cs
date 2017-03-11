@@ -73,7 +73,6 @@ namespace Scope.Controls.Visualization
 
         protected virtual void OnRenderSizeChanged()
         {
-
         }
     }
 }
