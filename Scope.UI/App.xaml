@@ -12,6 +12,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <converter:InvertConverter x:Key="InvertConverter" />
+            <converter:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
 
         </ResourceDictionary>
 

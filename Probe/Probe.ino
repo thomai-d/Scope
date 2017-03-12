@@ -8,6 +8,13 @@
 
 DAC_MCP49xx dac(DAC_MCP49xx::MCP4902, 9);
 
+#define DAC_DATA_LEN	256
+byte dac0_buffer[DAC_DATA_LEN];
+byte dac1_buffer[DAC_DATA_LEN];
+bool dac0_buffer_enabled;
+bool dac1_buffer_enabled;
+int sampleNo = 0;
+
 void setup() 
 {
 	hardware_init();
@@ -47,6 +54,26 @@ void loop()
 
 	case GetADCCommand:
 		cmd_getADC();
+		break;
+
+	case SetDAC0BufferCommand:
+		cmd_setDACData(dac0_buffer);
+		dac0_buffer_enabled = true;
+		break;
+
+	case SetDAC1BufferCommand:
+		cmd_setDACData(dac1_buffer);
+		dac1_buffer_enabled = true;
+		break;
+
+	case DisableDAC0BufferCommand:
+		dac0_buffer_enabled = false;
+		upstream_write(AckResponse);
+		break;
+
+	case DisableDAC1BufferCommand:
+		dac1_buffer_enabled = false;
+		upstream_write(AckResponse);
 		break;
 
 	default:
@@ -98,6 +125,7 @@ void cmd_readStream()
 
 	bool cancel = false;
 	int currentBurstCycles = 0;
+	sampleNo = 0;
 	while (true)
 	{
 		if (errorTooFast)
@@ -114,6 +142,12 @@ void cmd_readStream()
 			return;
 		}
 
+		// Set DAC data
+		if (dac0_buffer_enabled)
+			dac.outputA(dac0_buffer[sampleNo]);
+		if (dac1_buffer_enabled)
+			dac.outputB(dac1_buffer[sampleNo]);
+
 		// Wait for new samples.
 		while (samplesAreEmpty)
 		{
@@ -125,6 +159,8 @@ void cmd_readStream()
 			upstream_write(samples[n]);
 
 		samplesAreEmpty = true;
+		if (++sampleNo == DAC_DATA_LEN)
+			sampleNo = 0;
 
 		// Cancel?
 		if (++currentBurstCycles == burstSize)
@@ -168,6 +204,16 @@ void cmd_unknownCmd(byte cmd)
 	upstream_write(ErrorResponse);
 	upstream_write(cmd);
 	upstream_dump();
+}
+
+void cmd_setDACData(byte *dacData)
+{
+	for (int n = 0; n < DAC_DATA_LEN; n++)
+	{
+		dacData[n] = upstream_readByte();
+	}
+
+	upstream_write(AckResponse);
 }
 
 // STREAM - Helper methods

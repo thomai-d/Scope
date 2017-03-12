@@ -80,19 +80,6 @@
                         </Button>
                     </UniformGrid>
 
-                    <!-- DAC 0 -->
-                    <DockPanel LastChildFill="True" Margin="0, 5" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted}">
-                        <Label Content="DAC-0" DockPanel.Dock="Left" />
-                        <Label Content="{Binding LineConfigurations[0].CurrentValue, FallbackValue=0.00 V}" ContentStringFormat="0.00 V" DockPanel.Dock="Right" />
-                        <Slider Minimum="0" Maximum="255" Value="{Binding DAC0Value}" SmallChange="1" LargeChange="10" Margin="5,0" />
-                    </DockPanel>
-
-                    <!-- DAC 1 -->
-                    <DockPanel LastChildFill="True" Margin="0, 5" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted}">
-                        <Label Content="DAC-1" DockPanel.Dock="Left" />
-                        <Label Content="{Binding LineConfigurations[1].CurrentValue, FallbackValue=0.00 V}" ContentStringFormat="0.00 V" DockPanel.Dock="Right" />
-                        <Slider Minimum="0" Maximum="255" Value="{Binding DAC1Value}" SmallChange="1" LargeChange="10" Margin="5,0" />
-                    </DockPanel>
                 </StackPanel>
             </Expander>
 
@@ -125,20 +112,86 @@
 
             <!-- DAC Functions -->
             <Expander Header="DAC0 - Functions" IsExpanded="True" DockPanel.Dock="Top">
-                <UniformGrid Columns="4" Margin="5">
-                    <Button Command="{Binding RampUpDAC0Command}">
-                        <Path Width="30" Height="20" Data="M5,15 L25,5" Stroke="White" StrokeThickness="1" />
-                    </Button>
-                    <Button Command="{Binding RampUpDAC0Command}">
-                        <Path Width="30" Height="20" Data="M5,5 L25,15" Stroke="White" StrokeThickness="1" />
-                    </Button>
-                    <Button Command="{Binding RampUpDownDAC0Command}">
-                        <Path Width="30" Height="20" Data="M5,15 L15,5 25,15" Stroke="White" StrokeThickness="1" />
-                    </Button>
-                    <Button Command="{Binding SineDAC0Command}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <RadioButton Grid.Row="0" Grid.Column="0" IsChecked="{Binding Dac0Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.Sine}}"
+                                 IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
                         <Path Width="30" Height="20" Data="M5,10 C15,-5  15,25  25,10" Stroke="White" StrokeThickness="1"/>
-                    </Button>
-                </UniformGrid>
+                    </RadioButton>
+                    <RadioButton Grid.Row="0" Grid.Column="1" IsChecked="{Binding Dac0Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.RampUp}}"
+                                 IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                        <Path Width="30" Height="20" Data="M5,15 L25,5" Stroke="White" StrokeThickness="1" />
+                    </RadioButton>
+                    <RadioButton Grid.Row="0" Grid.Column="2" IsChecked="{Binding Dac0Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.RampDown}}"
+                                 IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                        <Path Width="30" Height="20" Data="M5,5 L25,15" Stroke="White" StrokeThickness="1" />
+                    </RadioButton>
+                    <RadioButton Grid.Row="0" Grid.Column="3" IsChecked="{Binding Dac0Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.Triangle}}"
+                                 IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                        <Path Width="30" Height="20" Data="M5,15 L15,5 25,15" Stroke="White" StrokeThickness="1" />
+                    </RadioButton>
+
+                    <!-- User -->
+                    <RadioButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding Dac0Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.User}}" Content="User" />
+                    <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center" LastChildFill="True" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted}">
+                        <Label Content="{Binding LineConfigurations[0].CurrentValue, FallbackValue=0.00 V}" ContentStringFormat="0.00 V" DockPanel.Dock="Right" />
+                        <Slider Minimum="0" Maximum="255" Value="{Binding DAC0Value}" SmallChange="1" LargeChange="10" Margin="5,0" />
+                    </DockPanel>
+
+                </Grid>
+            </Expander>
+
+            <!-- DAC Functions -->
+            <Expander Header="DAC1 - Functions" IsExpanded="True" DockPanel.Dock="Top">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <RadioButton Grid.Row="0" Grid.Column="0" IsChecked="{Binding Dac1Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.Sine}}"
+                                 IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                        <Path Width="30" Height="20" Data="M5,10 C15,-5  15,25  25,10" Stroke="White" StrokeThickness="1"/>
+                    </RadioButton>
+                    <RadioButton Grid.Row="0" Grid.Column="1" IsChecked="{Binding Dac1Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.RampUp}}"
+                                 IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                        <Path Width="30" Height="20" Data="M5,15 L25,5" Stroke="White" StrokeThickness="1" />
+                    </RadioButton>
+                    <RadioButton Grid.Row="0" Grid.Column="2" IsChecked="{Binding Dac1Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.RampDown}}"
+                                 IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                        <Path Width="30" Height="20" Data="M5,5 L25,15" Stroke="White" StrokeThickness="1" />
+                    </RadioButton>
+                    <RadioButton Grid.Row="0" Grid.Column="3" IsChecked="{Binding Dac1Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.Triangle}}"
+                                 IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                        <Path Width="30" Height="20" Data="M5,15 L15,5 25,15" Stroke="White" StrokeThickness="1" />
+                    </RadioButton>
+
+                    <!-- User -->
+                    <RadioButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding Dac1Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.User}}" Content="User" />
+                    <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center" LastChildFill="True" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted}">
+                        <Label Content="{Binding LineConfigurations[1].CurrentValue, FallbackValue=0.00 V}" ContentStringFormat="0.00 V" DockPanel.Dock="Right" />
+                        <Slider Minimum="0" Maximum="255" Value="{Binding DAC1Value}" SmallChange="1" LargeChange="10" Margin="5,0" />
+                    </DockPanel>
+
+                </Grid>
             </Expander>
 
 

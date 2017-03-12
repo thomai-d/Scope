@@ -20,8 +20,8 @@
     <SolidColorBrush x:Key="LightBrush" Color="#FF333333" />
     <SolidColorBrush x:Key="ShadeBrush" Color="#FF434343" />
 
-    <Color x:Key="TopGradientSelectColor">#FFFFFFFF</Color>
-    <Color x:Key="BottomGradientSelectColor">#FF737373</Color>
+    <Color x:Key="TopGradientSelectColor">Green</Color>
+    <Color x:Key="BottomGradientSelectColor">Green</Color>
 
     <Color x:Key="BlackColor">#FF000000</Color>
     <Color x:Key="WhiteColor">#FFFFFFFF</Color>
@@ -344,123 +344,6 @@
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Fill" Value="{DynamicResource DisabledBackgroundBrush}" TargetName="Background" />
                 <Setter Property="Stroke" Value="{DynamicResource DisabledBorderBrush}" TargetName="Background" />
-                <Setter Property="Foreground" Value="{DynamicResource DisabledForegroundBrush}" />
-                <Setter Property="Opacity" TargetName="bulletDecorator" Value="0.5" />
-            </Trigger>
-        </ControlTemplate.Triggers>
-    </ControlTemplate>
-
-    <Style TargetType="{x:Type RadioButton}">
-        <Setter Property="SnapsToDevicePixels" Value="true" />
-        <Setter Property="FocusVisualStyle" Value="{DynamicResource RadioButtonFocusVisual}" />
-        <Setter Property="Background" Value="{DynamicResource NormalBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
-        <Setter Property="Template" Value="{DynamicResource RadioButtonTemplate}" />
-        <Style.Triggers>
-        </Style.Triggers>
-    </Style>
-
-    <ControlTemplate x:Key="RadioButtonTemplate" TargetType="{x:Type RadioButton}">
-        <ControlTemplate.Resources>
-            <Storyboard x:Key="HoverOn">
-                <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="BackgroundOverlay" Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.1000000" Value="1" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-            <Storyboard x:Key="HoverOff">
-                <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="BackgroundOverlay" Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-            <Storyboard x:Key="PressedOn">
-                <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="PressedEllipse" Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.1000000" Value="1" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-            <Storyboard x:Key="PressedOff">
-                <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="PressedEllipse" Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-            <Storyboard x:Key="CheckedOn">
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CheckIcon" Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.1000000" Value="1" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-            <Storyboard x:Key="CheckedOff">
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CheckIcon" Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-            <Storyboard x:Key="FocussedOn">
-                <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="ContentFocusVisualElement" Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.1000000" Value="1" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-            <Storyboard x:Key="FocussedOff">
-                <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="ContentFocusVisualElement" Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-        </ControlTemplate.Resources>
-        <BulletDecorator Background="Transparent" x:Name="bulletDecorator">
-            <BulletDecorator.Bullet>
-                <Grid Width="16" Height="16">
-                    <Ellipse Height="14" Margin="1" x:Name="Background" Width="14" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="{TemplateBinding BorderThickness}" />
-                    <Ellipse Height="14" Margin="1" x:Name="BackgroundOverlay" Width="14" StrokeThickness="2" Stroke="{StaticResource HoverBrush}" Opacity="0" />
-                    <Ellipse Height="14" Margin="1" x:Name="PressedEllipse" Width="14" StrokeThickness="{TemplateBinding BorderThickness}" Stroke="{StaticResource HoverBrush}" Opacity="0" />
-                    <Ellipse Height="6" x:Name="CheckIcon" Width="6" Opacity="0" Fill="{StaticResource GlyphBrush}" />
-                    <Ellipse Height="14" x:Name="DisabledVisualElement" Width="14" Opacity="0" Fill="{StaticResource DisabledBackgroundBrush}" />
-                    <Ellipse Height="16" x:Name="ContentFocusVisualElement" Width="16" IsHitTestVisible="false" Opacity="0" Stroke="{StaticResource HoverShineBrush}" StrokeThickness="1" />
-                    <Ellipse Height="12" Margin="2,2,2,2" x:Name="ShineEllipse" Width="12" StrokeThickness="{TemplateBinding BorderThickness}" Stroke="{x:Null}" Fill="{StaticResource ShineBrush}" />
-                </Grid>
-            </BulletDecorator.Bullet>
-            <ContentPresenter RecognizesAccessKey="True" Margin="5,0,0,0" />
-        </BulletDecorator>
-        <ControlTemplate.Triggers>
-            <Trigger Property="IsFocused" Value="True">
-                <Trigger.ExitActions>
-                    <BeginStoryboard Storyboard="{StaticResource FocussedOff}" x:Name="FocussedOff_BeginStoryboard" />
-                </Trigger.ExitActions>
-                <Trigger.EnterActions>
-                    <BeginStoryboard Storyboard="{StaticResource FocussedOn}" x:Name="FocussedOn_BeginStoryboard" />
-                </Trigger.EnterActions>
-            </Trigger>
-            <Trigger Property="IsChecked" Value="false">
-
-                <Trigger.ExitActions>
-                    <BeginStoryboard x:Name="CheckedOn_BeginStoryboard" Storyboard="{StaticResource CheckedOn}" />
-                </Trigger.ExitActions>
-                <Trigger.EnterActions>
-                    <BeginStoryboard x:Name="CheckedOff_BeginStoryboard" Storyboard="{StaticResource CheckedOff}" />
-                </Trigger.EnterActions>
-
-            </Trigger>
-            <Trigger Property="IsChecked" Value="True" />
-            <Trigger Property="IsMouseOver" Value="true">
-
-                <Trigger.ExitActions>
-                    <BeginStoryboard x:Name="HoverOff_BeginStoryboard" Storyboard="{StaticResource HoverOff}" />
-                </Trigger.ExitActions>
-                <Trigger.EnterActions>
-                    <BeginStoryboard Storyboard="{StaticResource HoverOn}" />
-                </Trigger.EnterActions>
-
-            </Trigger>
-            <Trigger Property="IsPressed" Value="true">
-
-                <Trigger.ExitActions>
-                    <BeginStoryboard x:Name="PressedOff_BeginStoryboard" Storyboard="{StaticResource PressedOff}" />
-                </Trigger.ExitActions>
-                <Trigger.EnterActions>
-                    <BeginStoryboard x:Name="PressedOn_BeginStoryboard" Storyboard="{StaticResource PressedOn}" />
-                </Trigger.EnterActions>
-
-            </Trigger>
-            <Trigger Property="IsEnabled" Value="false">
-                <Setter Property="Fill" TargetName="Background" Value="{DynamicResource DisabledBackgroundBrush}" />
-                <Setter Property="Stroke" TargetName="Background" Value="{DynamicResource DisabledBorderBrush}" />
                 <Setter Property="Foreground" Value="{DynamicResource DisabledForegroundBrush}" />
                 <Setter Property="Opacity" TargetName="bulletDecorator" Value="0.5" />
             </Trigger>
@@ -2479,6 +2362,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Padding" Value="1" />
+        <Setter Property="Margin" Value="2" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
@@ -2493,10 +2377,10 @@
                         </Storyboard>
                         <Storyboard x:Key="HoverOff">
                             <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="HoverBorder" Storyboard.TargetProperty="(UIElement.Opacity)">
-                                <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0"/>
+                                <SplineDoubleKeyFrame KeyTime="00:00:00.1000000" Value="0"/>
                             </DoubleAnimationUsingKeyFrames>
                             <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="HoverShineBorder" Storyboard.TargetProperty="(UIElement.Opacity)">
-                                <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0"/>
+                                <SplineDoubleKeyFrame KeyTime="00:00:00.1000000" Value="0"/>
                             </DoubleAnimationUsingKeyFrames>
                         </Storyboard>
                         <Storyboard x:Key="CheckedOn">
@@ -2506,7 +2390,7 @@
                         </Storyboard>
                         <Storyboard x:Key="CheckedOff">
                             <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="CheckedBorder" Storyboard.TargetProperty="(UIElement.Opacity)">
-                                <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0"/>
+                                <SplineDoubleKeyFrame KeyTime="00:00:00.1000000" Value="0"/>
                             </DoubleAnimationUsingKeyFrames>
                         </Storyboard>
                         <Storyboard x:Key="PressedOn">
@@ -2516,7 +2400,7 @@
                         </Storyboard>
                         <Storyboard x:Key="PressedOff">
                             <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="Pressed" Storyboard.TargetProperty="(UIElement.Opacity)">
-                                <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0"/>
+                                <SplineDoubleKeyFrame KeyTime="00:00:00.1000000" Value="0"/>
                             </DoubleAnimationUsingKeyFrames>
                         </Storyboard>
                     </ControlTemplate.Resources>
@@ -3209,6 +3093,8 @@
         </Setter>
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     </Style>
+
+    <Style TargetType="{x:Type RadioButton}" BasedOn="{StaticResource {x:Type ToggleButton}}" />
 
 </ResourceDictionary>
 

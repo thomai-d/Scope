@@ -54,7 +54,7 @@ namespace Scope.ViewModel
                 {
                     _DAC0Value = value;
                     this.RaisePropertyChanged();
-                    this.OnDAC0Value_Changed(value);
+                    this.OnDAC0ValueChanged(value);
                 }
             }
         }
@@ -69,7 +69,7 @@ namespace Scope.ViewModel
                 {
                     _DAC1Value = value;
                     this.RaisePropertyChanged();
-                    this.OnDAC1Value_Changed(value);
+                    this.OnDAC1ValueChanged(value);
                 }
             }
         }
@@ -97,20 +97,6 @@ namespace Scope.ViewModel
                 if (value != _IsConnecting)
                 {
                     _IsConnecting = value;
-                    this.RaisePropertyChanged();
-                }
-            }
-        }
-
-        private bool _IsFunctionGenActive;
-        public bool IsFunctionGenActive
-        {
-            get { return _IsFunctionGenActive; }
-            set
-            {
-                if (value != _IsFunctionGenActive)
-                {
-                    _IsFunctionGenActive = value;
                     this.RaisePropertyChanged();
                 }
             }
@@ -144,6 +130,36 @@ namespace Scope.ViewModel
             }
         }
 
+        private DacFunction _Dac0Function = DacFunction.User;
+        public DacFunction Dac0Function
+        {
+            get { return _Dac0Function; }
+            set
+            {
+                if (value != _Dac0Function)
+                {
+                    _Dac0Function = value;
+                    this.RaisePropertyChanged();
+                    this.OnDacFunctionChanged(0, value);
+                }
+            }
+        }
+
+        private DacFunction _Dac1Function = DacFunction.User;
+        public DacFunction Dac1Function
+        {
+            get { return _Dac1Function; }
+            set
+            {
+                if (value != _Dac1Function)
+                {
+                    _Dac1Function = value;
+                    this.RaisePropertyChanged();
+                    this.OnDacFunctionChanged(1, value);
+                }
+            }
+        }
+
         public ObservableCollection<IBufferedStream<double>> DataStreams { get; } = new ObservableCollection<IBufferedStream<double>>();
 
         public ObservableCollection<LineConfiguration> LineConfigurations { get; } = new ObservableCollection<LineConfiguration>();
@@ -167,22 +183,14 @@ namespace Scope.ViewModel
         public ICommand ConnectCommand { get; }
         public ICommand StartStreamCommand { get; }
         public ICommand StopStreamCommand { get; }
-        public ICommand RampUpDAC0Command { get; }
-        public ICommand RampDownDAC0Command { get; }
-        public ICommand RampUpDownDAC0Command { get; }
-        public ICommand SineDAC0Command { get; }
 
         #endregion
 
         public MainViewModel()
         {
             this.ConnectCommand = new RelayCommand(this.ConnectCommandHandler, () => !this.IsConnecting && !this.IsConnected);
-            this.StartStreamCommand = new RelayCommand(this.StartStreamCommandHandler, () => this.IsConnected && !this.IsStreamStarted && !this.IsFunctionGenActive);
+            this.StartStreamCommand = new RelayCommand(this.StartStreamCommandHandler, () => this.IsConnected && !this.IsStreamStarted);
             this.StopStreamCommand = new RelayCommand(this.StopStreamCommandHandler, () => this.IsConnected && this.IsStreamStarted);
-            this.RampUpDAC0Command = new RelayCommand(() => this.UserFunctionCommandHandler(x => x), () => this.IsConnected && !this.IsStreamStarted && !this.IsFunctionGenActive);
-            this.RampDownDAC0Command = new RelayCommand(() => this.UserFunctionCommandHandler(x => (byte)(255-x)), () => this.IsConnected && !this.IsStreamStarted && !this.IsFunctionGenActive);
-            this.RampUpDownDAC0Command = new RelayCommand(() => this.UserFunctionCommandHandler(x => (byte)(x < 128 ? 2*x : 255-2*x)), () => this.IsConnected && !this.IsStreamStarted && !this.IsFunctionGenActive);
-            this.SineDAC0Command = new RelayCommand(() => this.UserFunctionCommandHandler(ByteToSineWave), () => this.IsConnected && !this.IsStreamStarted && !this.IsFunctionGenActive);
 
             this.dac0Stream = new BufferedStream<double>(StreamBufferSize);
             this.dac1Stream = new BufferedStream<double>(StreamBufferSize);
@@ -234,6 +242,9 @@ namespace Scope.ViewModel
 
                 await this.probe.OpenAsync();
                 this.IsConnected = true;
+
+                this.Dac0Function = DacFunction.User;
+                this.Dac1Function = DacFunction.User;
             }
             catch (Exception ex)
             {
@@ -285,58 +296,9 @@ namespace Scope.ViewModel
             this.readStreamCommand?.Cancel();
         }
 
-        private async void UserFunctionCommandHandler(Func<byte, byte> func)
-        {
-            this.IsFunctionGenActive = true;
-            CommandManager.InvalidateRequerySuggested();
+        /* UI Callbacks */
 
-            try
-            {
-                this.ResetViewData();
-
-                for (int n = 0; n < 256; n++)
-                {
-                    for (int repeat = 0; repeat < 3; repeat++)
-                    {
-                        var funcOut = func((byte)n);
-                        this.probe.WriteBytes((byte)Command.SetDAC0, funcOut);
-
-                        this.probe.WriteBytes((byte)Command.GetADC, 0);
-                        var adc0 = this.probe.ReadByte("GET SAMPLE");
-
-                        this.probe.WriteBytes((byte)Command.GetADC, 1);
-                        var adc1 = this.probe.ReadByte("GET SAMPLE");
-
-                        this.probe.WriteBytes((byte)Command.GetADC, 2);
-                        var adc2 = this.probe.ReadByte("GET SAMPLE");
-
-                        this.dac0Stream.Push(this.DACRawToVoltage(funcOut));
-                        this.adc0Stream.Push(this.ADCRawToVoltage(adc0));
-                        this.adc1Stream.Push(this.ADCRawToVoltage(adc1));
-                        this.adc2Stream.Push(this.ADCRawToVoltage(adc2));
-
-                        await Task.Delay(1);
-                        this.OnRedrawRequested(this, EventArgs.Empty);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                this.probe.Dispose();
-                this.IsConnected = false;
-                MessageBox.Show(ex.Message, ex.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            finally
-            {
-                this.IsFunctionGenActive = false;
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
-
-        /* Callbacks */
-
-        private void OnDAC0Value_Changed(int newValue)
+        private void OnDAC0ValueChanged(int newValue)
         {
             if (!this.IsStreamStarted)
                 return;
@@ -356,7 +318,7 @@ namespace Scope.ViewModel
             }
         }
 
-        private void OnDAC1Value_Changed(int newValue)
+        private void OnDAC1ValueChanged(int newValue)
         {
             if (!this.IsStreamStarted)
                 return;
@@ -376,6 +338,35 @@ namespace Scope.ViewModel
             }
         }
 
+        private void OnDacFunctionChanged(byte index, DacFunction function)
+        {
+            if (!this.IsConnected)
+                return;
+
+            switch (function)
+            {
+                case DacFunction.Sine:
+                    this.probe.EnableDACBuffer(index, Enumerable.Range(0, 256).Select(SineWave256).ToArray());
+                    break;
+
+                case DacFunction.RampUp:
+                    this.probe.EnableDACBuffer(index, Enumerable.Range(0, 256).Select(x => (byte)x).ToArray());
+                    break;
+
+                case DacFunction.RampDown:
+                    this.probe.EnableDACBuffer(index, Enumerable.Range(0, 256).Select(x => (byte)(255 - x)).ToArray());
+                    break;
+
+                case DacFunction.Triangle:
+                    this.probe.EnableDACBuffer(index, Enumerable.Range(0, 256).Select(x => (byte)(x < 128 ? 2 * x : 255 - 2 * x)).ToArray());
+                    break;
+
+                case DacFunction.User:
+                    this.probe.DisableDACBuffer(index);
+                    break;
+            }
+        }
+
         /* View Helper */
 
         private void ResetViewData()
@@ -392,12 +383,6 @@ namespace Scope.ViewModel
 
         private void OnRedrawRequested(object sender, EventArgs args)
         {
-            if (this.IsFunctionGenActive)
-            {
-                this.LineConfigurations[0].CurrentValue = this.dac0Stream.Last(1)[0];
-                this.LineConfigurations[1].CurrentValue = this.dac1Stream.Last(1)[0];
-            }
-
             this.LineConfigurations[2].CurrentValue = this.adc0Stream.Last(1)[0];
             this.LineConfigurations[3].CurrentValue = this.adc1Stream.Last(1)[0];
             this.LineConfigurations[4].CurrentValue = this.adc2Stream.Last(1)[0];
@@ -417,9 +402,18 @@ namespace Scope.ViewModel
             return adcValue * VRef / 255.0;
         }
 
-        private static byte ByteToSineWave(byte index)
+        private static byte SineWave256(int index)
         {
             return (byte)(128 + (Math.Sin(index / 255.0 * 4 * Math.PI) * 128.0));
         }
+    }
+
+    public enum DacFunction
+    {
+        Sine,
+        RampUp,
+        RampDown,
+        Triangle,
+        User
     }
 }

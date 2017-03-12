@@ -10,6 +10,8 @@ namespace Scope.Interface.Probe
 {
     public class ProbeConnection : IDisposable
     {
+        private const int DACBufferSize = 256;
+
         protected readonly SerialPort port;
 
         public ProbeConnection(string comPort, int baud)
@@ -37,6 +39,32 @@ namespace Scope.Interface.Probe
                     throw new CommandProtocolException("PROBE-WELCOME", $"Expected {Magic.WelcomeBytes.Dump()} but found: {data.Dump()}");
                 }
             });
+        }
+
+        public void EnableDACBuffer(byte index, byte[] buffer)
+        {
+            if (buffer.Length != DACBufferSize)
+                throw new InvalidOperationException($"Expected buffer length of {DACBufferSize}, but found {buffer.Length}");
+
+            if (index == 0)
+                this.WriteBytes((byte)Command.SetDAC0Buffer);
+            else if (index == 1)
+                this.WriteBytes((byte)Command.SetDAC1Buffer);
+            else throw new InvalidOperationException($"DAC {index} not supported.");
+
+            this.WriteBytes(buffer);
+            this.ExpectByte((byte)Response.Ack, "SET-BUFFER-ACK");
+        }
+
+        public void DisableDACBuffer(byte index)
+        {
+            if (index == 0)
+                this.WriteBytes((byte)Command.DisableDAC0Buffer);
+            else if (index == 1)
+                this.WriteBytes((byte)Command.DisableDAC1Buffer);
+            else throw new InvalidOperationException($"DAC {index} not supported.");
+
+            this.ExpectByte((byte)Response.Ack, "DISABLE-BUFFER-ACK");
         }
 
         public void WriteBytes(params byte[] data)
