@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
-namespace Scope.MVVM
+namespace TMD.MVVM
 {
     public class EnumToBooleanConverter : IValueConverter
     {

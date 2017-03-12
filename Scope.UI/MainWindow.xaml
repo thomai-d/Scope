@@ -1,12 +1,12 @@
-﻿<Window x:Class="Scope.MainWindow"
+﻿<Window x:Class="Scope.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Scope"
-        xmlns:visu="clr-namespace:Scope.Controls.Visualization"
+        xmlns:local="clr-namespace:Scope.UI"
+        xmlns:visu="clr-namespace:Scope.UI.Controls.Visualization"
         xmlns:oxy="http://oxyplot.org/wpf"
-        xmlns:vm="clr-namespace:Scope.ViewModel"
+        xmlns:vm="clr-namespace:Scope.UI.ViewModel"
         mc:Ignorable="d" Title="Scope-UI" Width="1000" Height="600"
         Icon="logo.ico"
         Background="{StaticResource WindowBackgroundBrush}"
@@ -45,7 +45,10 @@
 
             <!-- CONTROL -->
             <Expander Header="Control" IsExpanded="True" DockPanel.Dock="Top">
-                <UniformGrid Columns="3" Margin="5">
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox Width="100" ItemsSource="{Binding AvailableCOMPorts}" SelectedItem="{Binding SelectedCOMPort}" 
+                              IsEnabled="{Binding IsConnected, Converter={StaticResource InvertConverter}}" DropDownOpened="COMPorts_DropDownOpened"/>
+
                     <Button Command="{Binding ConnectCommand}" ToolTip="Connect">
                         <Canvas Width="35" Height="20" >
                             <Path Data="M10,5 C10,7.7614237 7.7614237,10 5,10 2.2385763,10 2.2385763,0 5,0 7.7614237,0 10,2.2385763 10,5 z" Fill="White" Height="10" Canvas.Left="12.929" Stretch="Fill" Canvas.Top="5.5" Width="7.071" Stroke="White"/>
@@ -55,7 +58,7 @@
                         </Canvas>
                     </Button>
                     
-                </UniformGrid>
+                </StackPanel>
 
             </Expander>
 

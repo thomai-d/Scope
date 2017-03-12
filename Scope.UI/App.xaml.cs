@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Scope
+namespace Scope.UI
 {
     /// <summary>
     /// Interaktionslogik für "App.xaml"

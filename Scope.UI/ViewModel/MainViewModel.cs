@@ -1,7 +1,5 @@
-﻿using Scope.Controls.Visualization;
-using Scope.Data;
+﻿using Scope.UI.Controls.Visualization;
 using Scope.Interface.Probe;
-using Scope.MVVM;
 using Scope.Properties;
 using System;
 using System.Collections.Generic;
@@ -14,8 +12,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using TMD.MVVM;
+using Scope.Data;
+using Scope.UI.Properties;
 
-namespace Scope.ViewModel
+namespace Scope.UI.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
@@ -116,7 +117,7 @@ namespace Scope.ViewModel
             }
         }
 
-        private int _SamplesPerSecond = 1000;
+        private int _SamplesPerSecond = Settings.Default.SamplesPerSecond;
         public int SamplesPerSecond
         {
             get { return _SamplesPerSecond; }
@@ -126,6 +127,8 @@ namespace Scope.ViewModel
                 {
                     _SamplesPerSecond = value;
                     this.RaisePropertyChanged();
+                    Settings.Default.SamplesPerSecond = value;
+                    Settings.Default.Save();
                 }
             }
         }
@@ -160,6 +163,35 @@ namespace Scope.ViewModel
             }
         }
 
+        private string _SelectedCOMPort;
+        public string SelectedCOMPort
+        {
+            get { return _SelectedCOMPort; }
+            set
+            {
+                if (value != _SelectedCOMPort)
+                {
+                    _SelectedCOMPort = value;
+                    this.RaisePropertyChanged();
+                    this.OnSelectedCOMPortChanged();
+                }
+            }
+        }
+
+        private string[] _AvailableCOMPorts;
+        public string[] AvailableCOMPorts
+        {
+            get { return _AvailableCOMPorts; }
+            set
+            {
+                if (value != _AvailableCOMPorts)
+                {
+                    _AvailableCOMPorts = value;
+                    this.RaisePropertyChanged();
+                }
+            }
+        }
+
         public ObservableCollection<IBufferedStream<double>> DataStreams { get; } = new ObservableCollection<IBufferedStream<double>>();
 
         public ObservableCollection<LineConfiguration> LineConfigurations { get; } = new ObservableCollection<LineConfiguration>();
@@ -183,14 +215,16 @@ namespace Scope.ViewModel
         public ICommand ConnectCommand { get; }
         public ICommand StartStreamCommand { get; }
         public ICommand StopStreamCommand { get; }
+        public ICommand RefreshCOMPorts { get; }
 
         #endregion
 
         public MainViewModel()
         {
-            this.ConnectCommand = new RelayCommand(this.ConnectCommandHandler, () => !this.IsConnecting && !this.IsConnected);
+            this.ConnectCommand = new RelayCommand(this.ConnectCommandHandler, () => !this.IsConnecting && !this.IsConnected && !string.IsNullOrEmpty(this.SelectedCOMPort));
             this.StartStreamCommand = new RelayCommand(this.StartStreamCommandHandler, () => this.IsConnected && !this.IsStreamStarted);
             this.StopStreamCommand = new RelayCommand(this.StopStreamCommandHandler, () => this.IsConnected && this.IsStreamStarted);
+            this.RefreshCOMPorts = new RelayCommand(this.RefreshCOMPortsHandler, () => !this.IsConnected);
 
             this.dac0Stream = new BufferedStream<double>(StreamBufferSize);
             this.dac1Stream = new BufferedStream<double>(StreamBufferSize);
@@ -215,13 +249,18 @@ namespace Scope.ViewModel
             this.LineConfigurations.Add(this.adc0Config);
             this.LineConfigurations.Add(this.adc1Config);
             this.LineConfigurations.Add(this.adc2Config);
+
+            this.RefreshCOMPortsHandler();
         }
 
         public override void OnViewLoaded()
         {
             base.OnViewLoaded();
 
-            this.ConnectCommand.Execute(null);
+#if DEBUG
+            if (!string.IsNullOrEmpty(this.SelectedCOMPort))
+                this.ConnectCommand.Execute(null);
+#endif
         }
 
         public override void OnViewUnloaded()
@@ -233,9 +272,12 @@ namespace Scope.ViewModel
 
         private async void ConnectCommandHandler()
         {
+            if (string.IsNullOrEmpty(this.SelectedCOMPort))
+                return;
+
             try
             {
-                this.probe = new ProbeConnection(Settings.Default.ProbePort, Settings.Default.ProbeBaud);
+                this.probe = new ProbeConnection(this.SelectedCOMPort, Settings.Default.ProbeBaud);
 
                 this.IsConnecting = true;
                 CommandManager.InvalidateRequerySuggested();
@@ -294,6 +336,12 @@ namespace Scope.ViewModel
         private void StopStreamCommandHandler()
         {
             this.readStreamCommand?.Cancel();
+        }
+
+        private void RefreshCOMPortsHandler()
+        {
+            this.AvailableCOMPorts = SerialPort.GetPortNames();
+            this.SelectedCOMPort = this.AvailableCOMPorts.FirstOrDefault(x => x == Settings.Default.ProbePort);
         }
 
         /* UI Callbacks */
@@ -365,6 +413,11 @@ namespace Scope.ViewModel
                     this.probe.DisableDACBuffer(index);
                     break;
             }
+        }
+
+        private void OnSelectedCOMPortChanged()
+        {
+            Settings.Default.ProbePort = this.SelectedCOMPort;
         }
 
         /* View Helper */

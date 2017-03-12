@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Scope.Properties {
+namespace Scope.UI.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -23,12 +23,15 @@ namespace Scope.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("COM4")]
         public string ProbePort {
             get {
                 return ((string)(this["ProbePort"]));
+            }
+            set {
+                this["ProbePort"] = value;
             }
         }
         
@@ -46,13 +49,13 @@ namespace Scope.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3000")]
-        public int BootDelayMs {
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int SamplesPerSecond {
             get {
-                return ((int)(this["BootDelayMs"]));
+                return ((int)(this["SamplesPerSecond"]));
             }
             set {
-                this["BootDelayMs"] = value;
+                this["SamplesPerSecond"] = value;
             }
         }
     }

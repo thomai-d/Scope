@@ -1,11 +1,11 @@
-﻿using Scope.MVVM;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMD.MVVM;
 
-namespace Scope.Controls.Visualization
+namespace Scope.UI.Controls.Visualization
 {
     public class Annotation : NPCBase
     {

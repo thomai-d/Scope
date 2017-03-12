@@ -6,12 +6,12 @@ using System.Windows;
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Threading.Tasks;
-using Scope.Controls.Visualization;
+using Scope.UI.Controls.Visualization;
 using Scope.Interface.Probe;
 using Scope.Properties;
-using Scope.ViewModel;
+using Scope.UI.ViewModel;
 
-namespace Scope
+namespace Scope.UI
 {
     public partial class MainWindow : Window
     {
@@ -34,6 +34,11 @@ namespace Scope
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
             this.mainViewModel.OnViewLoaded();
+        }
+
+        private void COMPorts_DropDownOpened(object sender, EventArgs e)
+        {
+            this.mainViewModel.RefreshCOMPorts.Execute(null);
         }
     }
 }

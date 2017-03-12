@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application x:Class="Scope.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-             xmlns:local="clr-namespace:Scope" 
-             xmlns:converter="clr-namespace:Scope.MVVM" 
+             xmlns:local="clr-namespace:Scope.UI" 
+             xmlns:converter="clr-namespace:TMD.MVVM;assembly=TMD" 
              StartupUri="MainWindow.xaml">
     <Application.Resources>
 

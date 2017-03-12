@@ -62,10 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ArrayExtensions.cs" />
     <Compile Include="Controls\Visualization\Annotation.cs" />
-    <Compile Include="MVVM\EnumToBooleanConverter.cs" />
-    <Compile Include="Tools\Performance.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -78,13 +75,6 @@
     <Compile Include="Controls\Visualization\LineConfiguration.cs" />
     <Compile Include="Controls\Visualization\PixelCanvas.cs" />
     <Compile Include="Controls\Visualization\StreamGraph.cs" />
-    <Compile Include="Data\BufferedStream.cs" />
-    <Compile Include="Data\IBufferedStream.cs" />
-    <Compile Include="Interface\Probe\CommandBase.cs" />
-    <Compile Include="Interface\Probe\CommandProtocolException.cs" />
-    <Compile Include="Interface\Probe\ProbeConnection.cs" />
-    <Compile Include="Interface\Probe\Protocol.cs" />
-    <Compile Include="Interface\Probe\ReadStreamCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -99,13 +89,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MVVM\BooleanToVisibilityConverterEx.cs" />
-    <Compile Include="MVVM\CompareConverter.cs" />
-    <Compile Include="MVVM\IfEmptyConverter.cs" />
-    <Compile Include="MVVM\InvertConverter.cs" />
-    <Compile Include="MVVM\NPCBase.cs" />
-    <Compile Include="MVVM\RelayCommand.cs" />
-    <Compile Include="MVVM\ViewModelBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -135,6 +118,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Scope.Interface\Scope.Interface.csproj">
+      <Project>{81219b90-b542-4d07-adb1-7fbee356646c}</Project>
+      <Name>Scope.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TMD\TMD.csproj">
+      <Project>{644407ee-4e7a-46b0-9411-73a9aeb1b89b}</Project>
+      <Name>TMD</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
