@@ -13,7 +13,12 @@ byte dac0_buffer[DAC_DATA_LEN];
 byte dac1_buffer[DAC_DATA_LEN];
 bool dac0_buffer_enabled;
 bool dac1_buffer_enabled;
-int sampleNo = 0;
+uint8_t dac0_counter = 0;
+uint8_t dac1_counter = 0;
+uint8_t dac0_pos = 0;
+uint8_t dac1_pos = 0;
+uint8_t dac0_prescaler = 0;
+uint8_t dac1_prescaler = 0;
 
 void setup() 
 {
@@ -57,11 +62,13 @@ void loop()
 		break;
 
 	case SetDAC0BufferCommand:
+		dac0_prescaler = upstream_readByte();
 		cmd_setDACData(dac0_buffer);
 		dac0_buffer_enabled = true;
 		break;
 
 	case SetDAC1BufferCommand:
+		dac1_prescaler = upstream_readByte();
 		cmd_setDACData(dac1_buffer);
 		dac1_buffer_enabled = true;
 		break;
@@ -125,7 +132,10 @@ void cmd_readStream()
 
 	bool cancel = false;
 	int currentBurstCycles = 0;
-	sampleNo = 0;
+	dac0_counter = 0;
+	dac1_counter = 0;
+	dac0_pos = 0;
+	dac1_pos = 0;
 	while (true)
 	{
 		if (errorTooFast)
@@ -144,9 +154,9 @@ void cmd_readStream()
 
 		// Set DAC data
 		if (dac0_buffer_enabled)
-			dac.outputA(dac0_buffer[sampleNo]);
+			dac.outputA(dac0_buffer[dac0_pos]);
 		if (dac1_buffer_enabled)
-			dac.outputB(dac1_buffer[sampleNo]);
+			dac.outputB(dac1_buffer[dac1_pos]);
 
 		// Wait for new samples.
 		while (samplesAreEmpty)
@@ -159,8 +169,34 @@ void cmd_readStream()
 			upstream_write(samples[n]);
 
 		samplesAreEmpty = true;
-		if (++sampleNo == DAC_DATA_LEN)
-			sampleNo = 0;
+
+		if (dac0_buffer_enabled)
+		{
+			dac0_counter++;
+
+			if (dac0_counter == dac0_prescaler)
+			{
+				dac0_counter = 0;
+				dac0_pos++;
+
+				if (dac0_pos == DAC_DATA_LEN)
+					dac0_pos = 0;
+			}
+		}
+
+		if (dac1_buffer_enabled)
+		{
+			dac1_counter++;
+
+			if (dac1_counter == dac1_prescaler)
+			{
+				dac1_counter = 0;
+				dac1_pos++;
+
+				if (dac1_pos == DAC_DATA_LEN)
+					dac1_pos = 0;
+			}
+		}
 
 		// Cancel?
 		if (++currentBurstCycles == burstSize)

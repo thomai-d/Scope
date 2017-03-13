@@ -21,6 +21,8 @@ namespace Scope.UI.ViewModel
     public class MainViewModel : ViewModelBase
     {
         public const double VRef = 5.0;
+        public const byte PrescalerDac0 = 4;
+        public const byte PrescalerDac1 = 2;
 
         public const int StreamBufferSize = 3000;
 
@@ -143,7 +145,7 @@ namespace Scope.UI.ViewModel
                 {
                     _Dac0Function = value;
                     this.RaisePropertyChanged();
-                    this.OnDacFunctionChanged(0, value);
+                    this.OnDacFunctionChanged(0, PrescalerDac0, value);
                 }
             }
         }
@@ -158,7 +160,7 @@ namespace Scope.UI.ViewModel
                 {
                     _Dac1Function = value;
                     this.RaisePropertyChanged();
-                    this.OnDacFunctionChanged(1, value);
+                    this.OnDacFunctionChanged(1, PrescalerDac1, value);
                 }
             }
         }
@@ -386,7 +388,7 @@ namespace Scope.UI.ViewModel
             }
         }
 
-        private void OnDacFunctionChanged(byte index, DacFunction function)
+        private void OnDacFunctionChanged(byte index, byte prescaler, DacFunction function)
         {
             if (!this.IsConnected)
                 return;
@@ -394,19 +396,19 @@ namespace Scope.UI.ViewModel
             switch (function)
             {
                 case DacFunction.Sine:
-                    this.probe.EnableDACBuffer(index, Enumerable.Range(0, 256).Select(SineWave256).ToArray());
+                    this.probe.EnableDACBuffer(index, prescaler, Enumerable.Range(0, 256).Select(SineWave256).ToArray());
                     break;
 
                 case DacFunction.RampUp:
-                    this.probe.EnableDACBuffer(index, Enumerable.Range(0, 256).Select(x => (byte)x).ToArray());
+                    this.probe.EnableDACBuffer(index, prescaler, Enumerable.Range(0, 256).Select(x => (byte)x).ToArray());
                     break;
 
                 case DacFunction.RampDown:
-                    this.probe.EnableDACBuffer(index, Enumerable.Range(0, 256).Select(x => (byte)(255 - x)).ToArray());
+                    this.probe.EnableDACBuffer(index, prescaler, Enumerable.Range(0, 256).Select(x => (byte)(255 - x)).ToArray());
                     break;
 
                 case DacFunction.Triangle:
-                    this.probe.EnableDACBuffer(index, Enumerable.Range(0, 256).Select(x => (byte)(x < 128 ? 2 * x : 255 - 2 * x)).ToArray());
+                    this.probe.EnableDACBuffer(index, prescaler, Enumerable.Range(0, 256).Select(x => (byte)(x < 128 ? 2 * x : 255 - 2 * x)).ToArray());
                     break;
 
                 case DacFunction.User:

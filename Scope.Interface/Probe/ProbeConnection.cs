@@ -43,7 +43,7 @@ namespace Scope.Interface.Probe
             });
         }
 
-        public void EnableDACBuffer(byte index, byte[] buffer)
+        public void EnableDACBuffer(byte index, byte prescaler, byte[] buffer)
         {
             if (buffer.Length != DACBufferSize)
                 throw new InvalidOperationException($"Expected buffer length of {DACBufferSize}, but found {buffer.Length}");
@@ -53,6 +53,8 @@ namespace Scope.Interface.Probe
             else if (index == 1)
                 this.WriteBytes((byte)Command.SetDAC1Buffer);
             else throw new InvalidOperationException($"DAC {index} not supported.");
+
+            this.WriteBytes(prescaler);
 
             this.WriteBytes(buffer);
             this.ExpectByte((byte)Response.Ack, "SET-BUFFER-ACK");
