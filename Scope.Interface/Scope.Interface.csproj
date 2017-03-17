@@ -42,11 +42,9 @@
   <ItemGroup>
     <Compile Include="Data\BufferedStream.cs" />
     <Compile Include="Data\IBufferedStream.cs" />
-    <Compile Include="Probe\CommandBase.cs" />
     <Compile Include="Probe\CommandProtocolException.cs" />
     <Compile Include="Probe\ProbeConnection.cs" />
     <Compile Include="Probe\Protocol.cs" />
-    <Compile Include="Probe\ReadStreamCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

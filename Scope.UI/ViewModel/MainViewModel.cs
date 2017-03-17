@@ -27,7 +27,7 @@ namespace Scope.UI.ViewModel
         public const int StreamBufferSize = 3000;
 
         private ProbeConnection probe;
-        private ReadStreamCommand readStreamCommand;
+        private CancellationTokenSource streamCancellationToken;
 
         #region Stream/Config-fields
 
@@ -279,7 +279,11 @@ namespace Scope.UI.ViewModel
 
             try
             {
+                if (this.probe != null)
+                    this.probe.BurstReceived -= this.OnRedrawRequested;
+
                 this.probe = new ProbeConnection(this.SelectedCOMPort, Settings.Default.ProbeBaud);
+                this.probe.BurstReceived += this.OnRedrawRequested;
 
                 this.IsConnecting = true;
                 CommandManager.InvalidateRequerySuggested();
@@ -310,13 +314,9 @@ namespace Scope.UI.ViewModel
 
             try
             {
-                this.readStreamCommand = new ReadStreamCommand(this.probe, this.SamplesPerSecond, this.adc0Stream, this.adc1Stream, this.adc2Stream);
-                this.readStreamCommand.BurstReceived += this.OnRedrawRequested;
-                var readStreamTask = this.readStreamCommand.Execute();
-
                 this.IsStreamStarted = true;
-
-                await readStreamTask;
+                this.streamCancellationToken = new CancellationTokenSource();
+                await this.probe.StartStream(this.SamplesPerSecond, this.streamCancellationToken.Token, this.adc0Stream, this.adc1Stream, this.adc2Stream);
             }
             catch (Exception ex)
             {
@@ -327,9 +327,6 @@ namespace Scope.UI.ViewModel
             }
             finally
             {
-                this.readStreamCommand.BurstReceived -= this.OnRedrawRequested;
-                this.readStreamCommand = null;
-
                 this.IsStreamStarted = false;
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -337,7 +334,8 @@ namespace Scope.UI.ViewModel
 
         private void StopStreamCommandHandler()
         {
-            this.readStreamCommand?.Cancel();
+            this.streamCancellationToken?.Cancel();
+            this.streamCancellationToken = null;
         }
 
         private void RefreshCOMPortsHandler()

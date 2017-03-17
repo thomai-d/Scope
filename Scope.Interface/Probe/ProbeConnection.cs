@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Scope.Data;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -23,6 +24,8 @@ namespace Scope.Interface.Probe
             this.port.ReadTimeout = 3000;
             this.port.WriteTimeout = 500;
         }
+
+        public event EventHandler BurstReceived;
 
         public Task OpenAsync()
         {
@@ -69,6 +72,54 @@ namespace Scope.Interface.Probe
             else throw new InvalidOperationException($"DAC {index} not supported.");
 
             this.ExpectByte((byte)Response.Ack, "DISABLE-BUFFER-ACK");
+        }
+
+        public async Task StartStream(int samplesPerSecond, CancellationToken cancellationToken, params IBufferedStream<double>[] streams)
+        {
+            var delayuS = (uint)(1000000 / samplesPerSecond);
+            var burstSize = (ushort)Math.Min(Math.Max(1, samplesPerSecond / 10), 300); // default: 10 bursts / second.
+
+            this.WriteBytes((byte)Command.StartStream);
+            this.WriteBytes((byte)streams.Length);
+            this.WriteDWord(delayuS);
+            this.WriteWord(burstSize);
+            this.ExpectByte((byte)Response.Ack, "ACK");
+
+            int streamIndex = 0;
+            bool cancelled = false;
+            while (true)
+            {
+                if (cancellationToken.IsCancellationRequested && !cancelled)
+                {
+                    this.WriteBytes((byte)Command.StopStream);
+                    cancelled = true;
+                }
+
+                var buffer = await this.ReadBuffer(burstSize * streams.Length, "READ-STREAM");
+                var status = this.ReadByte("STREAM-STATUS");
+                if (status != (byte)Response.Streaming)
+                {
+                    if (status == (byte)Response.ErrorTooFast)
+                    {
+                        throw new CommandProtocolException("STREAM", "Buffer underflow - try a lower samples-per-second setting.");
+                    }
+
+                    if (status == (byte)Response.Finish)
+                        return;
+
+                    throw new CommandProtocolException("STREAM", $"Expected status '{Response.Streaming}' but found '{(Response)status}'");
+                }
+
+                for (int n = 0; n < buffer.Length; n++)
+                {
+                    var value = (double)buffer[n] / 255 * 5.0;
+                    streams[streamIndex].Push(value);
+                    if (++streamIndex == streams.Length)
+                        streamIndex = 0;
+                }
+
+                this.BurstReceived?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public void WriteBytes(params byte[] data)
