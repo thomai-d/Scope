@@ -316,7 +316,7 @@ namespace Scope.UI.ViewModel
             {
                 this.IsStreamStarted = true;
                 this.streamCancellationToken = new CancellationTokenSource();
-                await this.probe.StartStream(this.SamplesPerSecond, this.streamCancellationToken.Token, this.adc0Stream, this.adc1Stream, this.adc2Stream);
+                await this.probe.StartStream(this.SamplesPerSecond, new[] { this.dac0Stream, this.dac1Stream }, new[] { this.adc0Stream, this.adc1Stream, this.adc2Stream }, this.streamCancellationToken.Token);
             }
             catch (Exception ex)
             {
@@ -354,8 +354,9 @@ namespace Scope.UI.ViewModel
             try
             {
                 newValue = Math.Min(Math.Max(0, newValue), 255);
-                this.probe.WriteBytes((byte)Command.SetDAC0, (byte)newValue);
-                this.dac0Config.CurrentValue = this.DACRawToVoltage((byte)newValue);
+                var voltage = this.DACRawToVoltage((byte)newValue);
+                this.dac0Config.CurrentValue = voltage;
+                this.probe.SetDAC(0, voltage);
             }
             catch (Exception ex)
             {
@@ -374,8 +375,9 @@ namespace Scope.UI.ViewModel
             try
             {
                 newValue = Math.Min(Math.Max(0, newValue), 255);
-                this.probe.WriteBytes((byte)Command.SetDAC1, (byte)newValue);
-                this.dac1Config.CurrentValue = this.DACRawToVoltage((byte)newValue);
+                var voltage = this.DACRawToVoltage((byte)newValue);
+                this.dac1Config.CurrentValue = voltage;
+                this.probe.SetDAC(1, voltage);
             }
             catch (Exception ex)
             {
