@@ -316,6 +316,8 @@ namespace Scope.UI.ViewModel
             {
                 this.IsStreamStarted = true;
                 this.streamCancellationToken = new CancellationTokenSource();
+                this.probe.SetDAC(0, 0.0);
+                this.probe.SetDAC(1, 0.0);
                 await this.probe.StartStream(this.SamplesPerSecond, new[] { this.dac0Stream, this.dac1Stream }, new[] { this.adc0Stream, this.adc1Stream, this.adc2Stream }, this.streamCancellationToken.Token);
             }
             catch (Exception ex)
@@ -355,7 +357,6 @@ namespace Scope.UI.ViewModel
             {
                 newValue = Math.Min(Math.Max(0, newValue), 255);
                 var voltage = this.DACRawToVoltage((byte)newValue);
-                this.dac0Config.CurrentValue = voltage;
                 this.probe.SetDAC(0, voltage);
             }
             catch (Exception ex)
@@ -376,7 +377,6 @@ namespace Scope.UI.ViewModel
             {
                 newValue = Math.Min(Math.Max(0, newValue), 255);
                 var voltage = this.DACRawToVoltage((byte)newValue);
-                this.dac1Config.CurrentValue = voltage;
                 this.probe.SetDAC(1, voltage);
             }
             catch (Exception ex)
@@ -438,6 +438,8 @@ namespace Scope.UI.ViewModel
 
         private void OnRedrawRequested(object sender, EventArgs args)
         {
+            this.LineConfigurations[0].CurrentValue = this.dac0Stream.Last(1)[0];
+            this.LineConfigurations[1].CurrentValue = this.dac1Stream.Last(1)[0];
             this.LineConfigurations[2].CurrentValue = this.adc0Stream.Last(1)[0];
             this.LineConfigurations[3].CurrentValue = this.adc1Stream.Last(1)[0];
             this.LineConfigurations[4].CurrentValue = this.adc2Stream.Last(1)[0];

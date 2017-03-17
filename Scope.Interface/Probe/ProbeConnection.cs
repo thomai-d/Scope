@@ -12,12 +12,15 @@ namespace Scope.Interface.Probe
     public class ProbeConnection : IDisposable
     {
         private const int DACBufferSize = 256;
+        private const int DACmaxValue = 256;
         private const int DACStreams = 2;
         private const double DACRef = 5.0;
 
         protected readonly SerialPort port;
 
         private double[] currentDacValues;
+        private byte[][] dacBuffers;
+        private byte[] dacPrescaler;
 
         public Task Properties { get; private set; }
 
@@ -29,6 +32,8 @@ namespace Scope.Interface.Probe
             this.port.WriteTimeout = 500;
 
             this.currentDacValues = new double[DACStreams];
+            this.dacBuffers = new byte[DACStreams][];
+            this.dacPrescaler = new byte[DACStreams];
         }
 
         public event EventHandler BurstReceived;
@@ -63,6 +68,8 @@ namespace Scope.Interface.Probe
                 this.WriteBytes((byte)Command.SetDAC1Buffer);
             else throw new InvalidOperationException($"DAC {index} not supported.");
 
+            this.dacBuffers[index] = buffer;
+            this.dacPrescaler[index] = prescaler;
             this.WriteBytes(prescaler);
 
             this.WriteBytes(buffer);
@@ -77,6 +84,8 @@ namespace Scope.Interface.Probe
                 this.WriteBytes((byte)Command.DisableDAC1Buffer);
             else throw new InvalidOperationException($"DAC {index} not supported.");
 
+            this.dacBuffers[index] = null;
+            this.dacPrescaler[index] = 0;
             this.ExpectByte((byte)Response.Ack, "DISABLE-BUFFER-ACK");
         }
 
@@ -91,6 +100,7 @@ namespace Scope.Interface.Probe
             this.WriteWord(burstSize);
             this.ExpectByte((byte)Response.Ack, "ACK");
 
+            var dacBufferPos = new int[DACStreams];
             bool cancelled = false;
             while (true)
             {
@@ -117,9 +127,25 @@ namespace Scope.Interface.Probe
 
                 for (int dacStreamIndex = 0; dacStreamIndex < dacStreams.Length; dacStreamIndex++)
                 {
-                    for (int n = 0; n < burstSize; n++)
+                    if (this.dacBuffers[dacStreamIndex] != null)
                     {
-                        dacStreams[dacStreamIndex].Push(this.currentDacValues[dacStreamIndex]);
+                        // Set the current DAC voltage to the DAC buffer value.
+                        for (int n = 0; n < burstSize; n++)
+                        {
+                            var value = this.dacBuffers[dacStreamIndex][dacBufferPos[dacStreamIndex] / this.dacPrescaler[dacStreamIndex]] / (double)DACmaxValue * DACRef;
+                            if (++dacBufferPos[dacStreamIndex] == this.dacBuffers[dacStreamIndex].Length * this.dacPrescaler[dacStreamIndex])
+                                dacBufferPos[dacStreamIndex] = 0;
+
+                            dacStreams[dacStreamIndex].Push(value);
+                        }
+                    }
+                    else
+                    {
+                        // Set the current DAC voltage to last known DAC value.
+                        for (int n = 0; n < burstSize; n++)
+                        {
+                            dacStreams[dacStreamIndex].Push(this.currentDacValues[dacStreamIndex]);
+                        }
                     }
                 }
 
@@ -143,7 +169,7 @@ namespace Scope.Interface.Probe
 
             this.currentDacValues[index] = voltage;
 
-            var value = (byte)(voltage / DACRef * 256);
+            var value = (byte)(voltage / DACRef * DACmaxValue);
             this.WriteBytes((byte)((byte)Command.SetDAC0 + index), value);
         }
 
