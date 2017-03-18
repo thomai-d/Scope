@@ -316,8 +316,6 @@ namespace Scope.UI.ViewModel
             {
                 this.IsStreamStarted = true;
                 this.streamCancellationToken = new CancellationTokenSource();
-                this.probe.SetDAC(0, 0.0);
-                this.probe.SetDAC(1, 0.0);
                 await this.probe.StartStream(this.SamplesPerSecond, new[] { this.dac0Stream, this.dac1Stream }, new[] { this.adc0Stream, this.adc1Stream, this.adc2Stream }, this.streamCancellationToken.Token);
             }
             catch (Exception ex)

@@ -13,7 +13,6 @@ namespace Scope.Interface.Probe
     {
         private const int DACBufferSize = 256;
         private const int DACmaxValue = 256;
-        private const int DACStreams = 2;
         private const double DACRef = 5.0;
 
         protected readonly SerialPort port;
@@ -30,10 +29,6 @@ namespace Scope.Interface.Probe
             this.port.ReadBufferSize = 4096;
             this.port.ReadTimeout = 3000;
             this.port.WriteTimeout = 500;
-
-            this.currentDacValues = new double[DACStreams];
-            this.dacBuffers = new byte[DACStreams][];
-            this.dacPrescaler = new byte[DACStreams];
         }
 
         public event EventHandler BurstReceived;
@@ -94,77 +89,87 @@ namespace Scope.Interface.Probe
             var delayuS = (uint)(1000000 / samplesPerSecond);
             var burstSize = (ushort)Math.Min(Math.Max(1, samplesPerSecond / 10), 300); // default: 10 bursts / second.
 
+            // Initialize DACs.
+            this.currentDacValues = new double[dacStreams.Length];
+            this.dacBuffers = new byte[dacStreams.Length][];
+            this.dacPrescaler = new byte[dacStreams.Length];
+            var dacBufferPos = new int[dacStreams.Length];
+            for (byte n = 0; n < dacStreams.Length; n++)
+                this.SetDAC(n, 0.0);
+
+            // Start stream.
             this.WriteBytes((byte)Command.StartStream);
             this.WriteBytes((byte)adcStreams.Length);
             this.WriteDWord(delayuS);
             this.WriteWord(burstSize);
             this.ExpectByte((byte)Response.Ack, "ACK");
 
-            var dacBufferPos = new int[DACStreams];
+            int samplesRead = 0;
             bool cancelled = false;
             while (true)
             {
+                // Cancel stream?
                 if (cancellationToken.IsCancellationRequested && !cancelled)
                 {
                     this.WriteBytes((byte)Command.StopStream);
                     cancelled = true;
                 }
 
-                var buffer = await this.ReadBuffer(burstSize * adcStreams.Length, "READ-STREAM");
-                var status = this.ReadByte("STREAM-STATUS");
-                if (status != (byte)Response.Streaming)
-                {
-                    if (status == (byte)Response.ErrorTooFast)
-                    {
-                        throw new CommandProtocolException("STREAM", "Buffer underflow - try a lower samples-per-second setting.");
-                    }
-
-                    if (status == (byte)Response.Finish)
-                        return;
-
-                    throw new CommandProtocolException("STREAM", $"Expected status '{Response.Streaming}' but found '{(Response)status}'");
-                }
-
+                var buffer = await this.ReadBuffer(adcStreams.Length, "READ-SAMPLES");
                 for (int dacStreamIndex = 0; dacStreamIndex < dacStreams.Length; dacStreamIndex++)
                 {
                     if (this.dacBuffers[dacStreamIndex] != null)
                     {
                         // Set the current DAC voltage to the DAC buffer value.
-                        for (int n = 0; n < burstSize; n++)
-                        {
-                            var value = this.dacBuffers[dacStreamIndex][dacBufferPos[dacStreamIndex] / this.dacPrescaler[dacStreamIndex]] / (double)DACmaxValue * DACRef;
-                            if (++dacBufferPos[dacStreamIndex] == this.dacBuffers[dacStreamIndex].Length * this.dacPrescaler[dacStreamIndex])
-                                dacBufferPos[dacStreamIndex] = 0;
+                        var value = this.dacBuffers[dacStreamIndex][dacBufferPos[dacStreamIndex] / this.dacPrescaler[dacStreamIndex]] / (double)DACmaxValue * DACRef;
+                        if (++dacBufferPos[dacStreamIndex] == this.dacBuffers[dacStreamIndex].Length * this.dacPrescaler[dacStreamIndex])
+                            dacBufferPos[dacStreamIndex] = 0;
 
-                            dacStreams[dacStreamIndex].Push(value);
-                        }
+                        dacStreams[dacStreamIndex].Push(value);
                     }
                     else
                     {
                         // Set the current DAC voltage to last known DAC value.
-                        for (int n = 0; n < burstSize; n++)
-                        {
-                            dacStreams[dacStreamIndex].Push(this.currentDacValues[dacStreamIndex]);
-                        }
+                        dacStreams[dacStreamIndex].Push(this.currentDacValues[dacStreamIndex]);
                     }
                 }
 
+                // Read samples.
                 for (int adcStreamIndex = 0; adcStreamIndex < adcStreams.Length; adcStreamIndex++)
                 {
-                    for (int n = adcStreamIndex; n < buffer.Length; n += adcStreams.Length)
-                    {
-                        var value = (double)buffer[n] / 255 * 5.0;
-                        adcStreams[adcStreamIndex].Push(value);
-                    }
+                    var value = (double)buffer[adcStreamIndex] / 255 * 5.0;
+                    adcStreams[adcStreamIndex].Push(value);
                 }
 
-                this.BurstReceived?.Invoke(this, EventArgs.Empty);
+                if (++samplesRead == burstSize)
+                {
+                    // Burst received?
+                    samplesRead = 0;
+
+                    this.BurstReceived?.Invoke(this, EventArgs.Empty);
+
+                    var status = this.ReadByte("STREAM-STATUS");
+                    if (status != (byte)Response.Streaming)
+                    {
+                        if (status == (byte)Response.ErrorTooFast)
+                        {
+                            throw new CommandProtocolException("STREAM", "Buffer underflow - try a lower samples-per-second setting.");
+                        }
+
+                        if (status == (byte)Response.Finish)
+                            return;
+
+                        throw new CommandProtocolException("STREAM", $"Expected status '{Response.Streaming}' but found '{(Response)status}'");
+                    }
+                }
             }
         }
 
         public void SetDAC(uint index, double voltage)
         {
-            if (index >= DACStreams)
+            if (this.dacBuffers == null)
+                throw new InvalidOperationException("Start stream before setting DAC.");
+            if (index >= this.dacBuffers.Length)
                 throw new InvalidOperationException($"Unsupported DAC index: {index}");
 
             this.currentDacValues[index] = voltage;
