@@ -303,8 +303,6 @@ namespace Scope.UI.ViewModel
 
         private async void StartStreamCommandHandler()
         {
-            this.ResetViewData();
-
             try
             {
                 this.IsStreamStarted = true;
@@ -414,18 +412,6 @@ namespace Scope.UI.ViewModel
         }
 
         /* View Helper */
-
-        private void ResetViewData()
-        {
-            this.DAC0Value = 0;
-            this.DAC1Value = 0;
-
-            foreach (var stream in this.DataStreams)
-                stream.Clear();
-
-            foreach (var config in this.LineConfigurations)
-                config.CurrentValue = 0;
-        }
 
         private void OnRedrawRequested(object sender, EventArgs args)
         {
