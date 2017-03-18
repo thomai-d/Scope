@@ -251,6 +251,8 @@ namespace Scope.UI.ViewModel
             this.LineConfigurations.Add(this.adc0Config);
             this.LineConfigurations.Add(this.adc1Config);
             this.LineConfigurations.Add(this.adc2Config);
+            foreach (var cfg in this.LineConfigurations)
+                cfg.IsVisibleChanged += this.OnRedrawRequested;
 
             this.RefreshCOMPortsHandler();
         }

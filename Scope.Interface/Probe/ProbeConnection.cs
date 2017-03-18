@@ -14,6 +14,7 @@ namespace Scope.Interface.Probe
         private const int DACBufferSize = 256;
         private const int DACmaxValue = 256;
         private const double DACRef = 5.0;
+        private const int MaxDACStreams = 2;
 
         protected readonly SerialPort port;
 
@@ -29,6 +30,10 @@ namespace Scope.Interface.Probe
             this.port.ReadBufferSize = 4096;
             this.port.ReadTimeout = 3000;
             this.port.WriteTimeout = 500;
+
+            this.currentDacValues = new double[MaxDACStreams];
+            this.dacBuffers = new byte[MaxDACStreams][];
+            this.dacPrescaler = new byte[MaxDACStreams];
         }
 
         public event EventHandler BurstReceived;
@@ -90,9 +95,6 @@ namespace Scope.Interface.Probe
             var burstSize = (ushort)Math.Min(Math.Max(1, samplesPerSecond / 10), 300); // default: 10 bursts / second.
 
             // Initialize DACs.
-            this.currentDacValues = new double[dacStreams.Length];
-            this.dacBuffers = new byte[dacStreams.Length][];
-            this.dacPrescaler = new byte[dacStreams.Length];
             var dacBufferPos = new int[dacStreams.Length];
             for (byte n = 0; n < dacStreams.Length; n++)
                 this.SetDAC(n, 0.0);

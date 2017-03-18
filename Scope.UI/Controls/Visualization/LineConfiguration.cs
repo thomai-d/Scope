@@ -11,6 +11,8 @@ namespace Scope.UI.Controls.Visualization
 {
     public class LineConfiguration : NPCBase
     {
+        public event EventHandler IsVisibleChanged;
+
         #region NotifyProperties
 
         private Color _Color;
@@ -78,6 +80,7 @@ namespace Scope.UI.Controls.Visualization
                 if (value != _IsVisible)
                 {
                     _IsVisible = value;
+                    this.IsVisibleChanged?.Invoke(this, EventArgs.Empty);
                     this.RaisePropertyChanged();
                 }
             }
