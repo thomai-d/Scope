@@ -1,0 +1,10 @@
+*.suo
+bin
+obj
+Debug
+Release
+Packages
+*.d
+*.o
+*.vmps.xml
+*.vcxproj.user
