@@ -8,7 +8,7 @@ Arduino based oscilloscope with controllable DAC and WPF user interface.
 + [MCP4902](http://ww1.microchip.com/downloads/en/DeviceDoc/22250A.pdf) SPI-DAC
 
 ## Features
-+ 4 channels, 8 bit resolution
++ 3 channels, 8 bit resolution
 + up to 3500 samples per second (per channel)
 + Sine/Saw/Triangle function generator
 + Control the DACs from your PC.
