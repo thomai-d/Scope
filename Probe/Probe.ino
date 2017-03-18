@@ -109,7 +109,6 @@ void timerTick()
 
 	for (int n = 0; n < streams; n++)
 	{
-		analogRead(A0 + n);
 		samples[n] = (byte)(analogRead(A0 + n) >> 2);
 	}
 
