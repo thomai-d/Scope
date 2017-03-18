@@ -6,7 +6,7 @@
 #include "Protocol.h"
 #include "Hardware.h"
 
-DAC_MCP49xx dac(DAC_MCP49xx::MCP4902, 9);
+DAC_MCP49xx dac(DAC_MCP49xx::MCP4902, DO_4902_CS);
 
 #define DAC_DATA_LEN	256
 byte dac0_buffer[DAC_DATA_LEN];
