@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TMD.MVVM
 {
-    public class NPCBase : INotifyPropertyChanged
+    public class NotifyPropertyChanged : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

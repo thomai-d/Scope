@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TMD.MVVM
 {
-    public class ViewModelBase : NPCBase
+    public class ViewModelBase : NotifyPropertyChanged
     {
         public virtual void OnViewLoaded()
         {

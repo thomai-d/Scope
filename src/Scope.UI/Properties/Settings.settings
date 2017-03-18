@@ -6,10 +6,16 @@
       <Value Profile="(Default)">COM4</Value>
     </Setting>
     <Setting Name="ProbeBaud" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">115200</Value>
+      <Value Profile="(Default)">128000</Value>
     </Setting>
     <Setting Name="SamplesPerSecond" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="DACChannels" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="ADCChannels" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4</Value>
     </Setting>
   </Settings>
 </SettingsFile>

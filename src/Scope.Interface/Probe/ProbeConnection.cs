@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TMD.Extensions;
 
 namespace Scope.Interface.Probe
 {
@@ -46,7 +47,7 @@ namespace Scope.Interface.Probe
 
             return Task.Run(async () =>
             {
-                await Task.Delay(Scope.Interface.Properties.Settings.Default.BootDelayMs);
+                await Task.Delay(Interface.Properties.Settings.Default.BootDelayMs);
 
                 var data = this.ReadAll();
                 if (!data.EndsWith(Magic.WelcomeBytes))

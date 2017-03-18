@@ -15,6 +15,9 @@ using System.Windows.Media;
 using TMD.MVVM;
 using Scope.Data;
 using Scope.UI.Properties;
+using TMD;
+using TMD.Extensions;
+using TMD.Media;
 
 namespace Scope.UI.ViewModel
 {
@@ -31,17 +34,8 @@ namespace Scope.UI.ViewModel
 
         #region Stream/Config-fields
 
-        private IBufferedStream<double> dac0Stream;
-        private IBufferedStream<double> dac1Stream;
-        private IBufferedStream<double> adc0Stream;
-        private IBufferedStream<double> adc1Stream;
-        private IBufferedStream<double> adc2Stream;
-        private IBufferedStream<double> adc3Stream;
-        private LineConfiguration dac0Config;
-        private LineConfiguration dac1Config;
-        private LineConfiguration adc0Config;
-        private LineConfiguration adc1Config;
-        private LineConfiguration adc2Config;
+        private IBufferedStream<double>[] dacStreams;
+        private IBufferedStream<double>[] adcStreams;
 
         #endregion
 
@@ -202,7 +196,7 @@ namespace Scope.UI.ViewModel
 
         #region Other properties
 
-        public int[] SelectableSamplesPerSecond { get; private set; } = { 1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 3000, 3500 };
+        public int[] SelectableSamplesPerSecond { get; private set; } = { 1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 3000, 3500, 4000, 5000, 5500 };
 
         #endregion
 
@@ -228,29 +222,26 @@ namespace Scope.UI.ViewModel
             this.StopStreamCommand = new RelayCommand(this.StopStreamCommandHandler, () => this.IsConnected && this.IsStreamStarted);
             this.RefreshCOMPorts = new RelayCommand(this.RefreshCOMPortsHandler, () => !this.IsConnected);
 
-            this.dac0Stream = new BufferedStream<double>(StreamBufferSize);
-            this.dac1Stream = new BufferedStream<double>(StreamBufferSize);
-            this.adc0Stream = new BufferedStream<double>(StreamBufferSize);
-            this.adc1Stream = new BufferedStream<double>(StreamBufferSize);
-            this.adc2Stream = new BufferedStream<double>(StreamBufferSize);
-            this.adc3Stream = new BufferedStream<double>(StreamBufferSize);
-            this.DataStreams.Add(this.dac0Stream);
-            this.DataStreams.Add(this.dac1Stream);
-            this.DataStreams.Add(this.adc0Stream);
-            this.DataStreams.Add(this.adc1Stream);
-            this.DataStreams.Add(this.adc2Stream);
-            this.DataStreams.Add(this.adc3Stream);
+            var palette = new ColorPalette(Settings.Default.ADCChannels + Settings.Default.DACChannels);
 
-            this.dac0Config = new LineConfiguration { Name = "DAC0", Color = Colors.Blue, Unit = "V" };
-            this.dac1Config = new LineConfiguration { Name = "DAC1", Color = Colors.Green, Unit = "V" };
-            this.adc0Config = new LineConfiguration { Name = "ADC0", Color = Colors.Red, Unit = "V" };
-            this.adc1Config = new LineConfiguration { Name = "ADC1", Color = Colors.Orange, Unit = "V" };
-            this.adc2Config = new LineConfiguration { Name = "ADC2", Color = Colors.Violet, Unit = "V" };
-            this.LineConfigurations.Add(this.dac0Config);
-            this.LineConfigurations.Add(this.dac1Config);
-            this.LineConfigurations.Add(this.adc0Config);
-            this.LineConfigurations.Add(this.adc1Config);
-            this.LineConfigurations.Add(this.adc2Config);
+            // Setup DAC streams.
+            this.dacStreams = new IBufferedStream<double>[Settings.Default.DACChannels];
+            for (int n = 0; n < Settings.Default.DACChannels; n++)
+            {
+                this.dacStreams[n] = new BufferedStream<double>(StreamBufferSize);
+                this.LineConfigurations.Add(new LineConfiguration($"DAC{n}", palette.NextColor(), "V"));
+            }
+            this.DataStreams.AddRange(this.dacStreams);
+
+            // Setup ADC streams.
+            this.adcStreams = new IBufferedStream<double>[Settings.Default.ADCChannels];
+            for (int n = 0; n < Settings.Default.ADCChannels; n++)
+            {
+                this.adcStreams[n] = new BufferedStream<double>(StreamBufferSize);
+                this.LineConfigurations.Add(new LineConfiguration($"ADC{n}", palette.NextColor(), "V"));
+            }
+            this.DataStreams.AddRange(this.adcStreams);
+
             foreach (var cfg in this.LineConfigurations)
                 cfg.IsVisibleChanged += this.OnRedrawRequested;
 
@@ -318,7 +309,7 @@ namespace Scope.UI.ViewModel
             {
                 this.IsStreamStarted = true;
                 this.streamCancellationToken = new CancellationTokenSource();
-                await this.probe.StartStream(this.SamplesPerSecond, new[] { this.dac0Stream, this.dac1Stream }, new[] { this.adc0Stream, this.adc1Stream, this.adc2Stream }, this.streamCancellationToken.Token);
+                await this.probe.StartStream(this.SamplesPerSecond, this.dacStreams, this.adcStreams, this.streamCancellationToken.Token);
             }
             catch (Exception ex)
             {
@@ -438,11 +429,11 @@ namespace Scope.UI.ViewModel
 
         private void OnRedrawRequested(object sender, EventArgs args)
         {
-            this.LineConfigurations[0].CurrentValue = this.dac0Stream.Last(1)[0];
-            this.LineConfigurations[1].CurrentValue = this.dac1Stream.Last(1)[0];
-            this.LineConfigurations[2].CurrentValue = this.adc0Stream.Last(1)[0];
-            this.LineConfigurations[3].CurrentValue = this.adc1Stream.Last(1)[0];
-            this.LineConfigurations[4].CurrentValue = this.adc2Stream.Last(1)[0];
+            int idx = 0;
+            foreach (var stream in this.dacStreams)
+                this.LineConfigurations[idx++].CurrentValue = stream.Last(1)[0];
+            foreach (var stream in this.adcStreams)
+                this.LineConfigurations[idx++].CurrentValue = stream.Last(1)[0];
 
             this.RedrawRequested?.Invoke(this, EventArgs.Empty);
         }

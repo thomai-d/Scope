@@ -7,7 +7,7 @@ using TMD.MVVM;
 
 namespace Scope.UI.Controls.Visualization
 {
-    public class Annotation : NPCBase
+    public class Annotation : NotifyPropertyChanged
     {
         private double _X;
         public double X

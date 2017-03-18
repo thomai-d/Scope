@@ -37,7 +37,7 @@ namespace Scope.UI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("115200")]
+        [global::System.Configuration.DefaultSettingValueAttribute("128000")]
         public int ProbeBaud {
             get {
                 return ((int)(this["ProbeBaud"]));
@@ -56,6 +56,30 @@ namespace Scope.UI.Properties {
             }
             set {
                 this["SamplesPerSecond"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int DACChannels {
+            get {
+                return ((int)(this["DACChannels"]));
+            }
+            set {
+                this["DACChannels"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int ADCChannels {
+            get {
+                return ((int)(this["ADCChannels"]));
+            }
+            set {
+                this["ADCChannels"] = value;
             }
         }
     }

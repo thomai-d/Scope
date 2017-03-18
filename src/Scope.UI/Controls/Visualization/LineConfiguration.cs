@@ -9,9 +9,16 @@ using TMD.MVVM;
 
 namespace Scope.UI.Controls.Visualization
 {
-    public class LineConfiguration : NPCBase
+    public class LineConfiguration : NotifyPropertyChanged
     {
         public event EventHandler IsVisibleChanged;
+
+        public LineConfiguration(string name, Color color, string unit)
+        {
+            this.Name = name;
+            this.Color = color;
+            this.Unit = unit;
+        }
 
         #region NotifyProperties
 

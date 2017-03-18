@@ -24,7 +24,7 @@ void setup()
 {
 	hardware_init();
 
-	upstream_init(115200);
+	upstream_init(128000);
 
 	Timer1.attachInterrupt(timerTick);
 
