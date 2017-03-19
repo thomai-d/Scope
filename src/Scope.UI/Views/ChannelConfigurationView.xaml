@@ -23,6 +23,7 @@
                 <RowDefinition Height="Auto" /> <!-- Color -->
                 <RowDefinition Height="Auto" /> <!-- Minimum -->
                 <RowDefinition Height="Auto" /> <!-- Maximum -->
+                <RowDefinition Height="Auto" /> <!-- Scale -->
                 <RowDefinition Height="Auto" /> <!-- Unit -->
                 <RowDefinition Height="Auto" /> <!-- Close -->
             </Grid.RowDefinitions>
@@ -46,10 +47,13 @@
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Configuration.MaxValue, UpdateSourceTrigger=PropertyChanged}" Width="100" />
             <Label Grid.Row="2" Grid.Column="2" Margin="3,0" Content="{Binding Configuration.Unit, FallbackValue=V}" />
 
-            <Label Grid.Row="3" Content="Unit" />
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Configuration.Unit, FallbackValue=V, UpdateSourceTrigger=PropertyChanged}" />
+            <Label Grid.Row="3" Content="Scale" />
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Configuration.Scale, UpdateSourceTrigger=PropertyChanged}" Width="100" />
 
-            <Button Grid.Row="4" Grid.Column="1" Margin="0, 10, 0, 0" Content="OK" Command="{Binding CloseCommand}" IsDefault="True" />
+            <Label Grid.Row="4" Content="Unit" />
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Configuration.Unit, FallbackValue=V, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Button Grid.Row="5" Grid.Column="1" Margin="0, 10, 0, 0" Content="OK" Command="{Binding CloseCommand}" IsDefault="True" />
         </Grid>
     </GroupBox>
 </Window>

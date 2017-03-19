@@ -32,6 +32,20 @@ namespace Scope.UI.Controls.Visualization
 
         #region NotifyProperties
 
+        private double _Scale = 1.0;
+        public double Scale
+        {
+            get { return _Scale; }
+            set
+            {
+                if (value != _Scale)
+                {
+                    _Scale = value;
+                    this.RaisePropertyChanged();
+                }
+            }
+        }
+
         private double _MinValue;
         public double MinValue
         {
@@ -139,9 +153,14 @@ namespace Scope.UI.Controls.Visualization
             return $"LineConfig '{this.Name}'; {this.MinValue} - {this.MaxValue} {this.Unit}; {this.Color}";
         }
 
-        internal void SetCurrentValueRaw(double v)
+        public double RawToValue(double raw)
         {
-            this.CurrentValue = this.MinValue + v * (this.MaxValue - this.MinValue);
+            return (this.MinValue + raw * (this.MaxValue - this.MinValue)) * this.Scale;
+        }
+
+        public void SetCurrentValueRaw(double v)
+        {
+            this.CurrentValue = this.RawToValue(v);
         }
     }
 }

@@ -128,7 +128,7 @@ namespace Scope.UI.Controls.Visualization
                     if (++p == buffer.Length)
                         p = 0;
 
-                    var currentRealValue = lineConfig.MinValue + buffer[p] * (lineConfig.MaxValue - lineConfig.MinValue);
+                    var currentRealValue = lineConfig.RawToValue(buffer[p]);
                     int y = this.ValueToY(currentRealValue);
                     this.Bitmap.DrawLine(x + 1, lastY, x, y, color);
                     lastY = y;
