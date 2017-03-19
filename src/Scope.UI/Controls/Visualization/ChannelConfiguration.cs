@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,7 +61,6 @@ namespace Scope.UI.Controls.Visualization
         }
 
         private Color _Color;
-        [XmlIgnore]
         public Color Color
         {
             get { return _Color; }
@@ -88,8 +88,8 @@ namespace Scope.UI.Controls.Visualization
             }
         }
 
+        [JsonIgnore]
         private double _CurrentValue;
-        [XmlIgnore]
         public double CurrentValue
         {
             get { return _CurrentValue; }

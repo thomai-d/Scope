@@ -22,6 +22,7 @@ using Scope.UI.Services;
 using Scope.UI.Views;
 using System.Xml.Serialization;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Scope.UI.ViewModel
 {
@@ -197,7 +198,7 @@ namespace Scope.UI.ViewModel
 
         public List<IBufferedStream<double>> DataStreams { get; } = new List<IBufferedStream<double>>();
 
-        public ChannelConfigurationList ChannelConfigurations { get; private set; } = new ChannelConfigurationList();
+        public List<ChannelConfiguration> ChannelConfigurations { get; private set; } = new List<ChannelConfiguration>();
 
         #endregion
 
@@ -323,7 +324,7 @@ namespace Scope.UI.ViewModel
         private void EditChannelConfigurationHandler(ChannelConfiguration config)
         {
             DialogService.ShowDialog<ChannelConfigurationView>(new ChannelConfigurationViewModel(config));
-            Settings.Default.ChannelConfigurations = this.ChannelConfigurations.ToJson();
+            Settings.Default.ChannelConfigurations = JsonConvert.SerializeObject(this.ChannelConfigurations);
             Settings.Default.Save();
         }
 
@@ -423,11 +424,6 @@ namespace Scope.UI.ViewModel
             return dacValue * VRef / 255.0;
         }
 
-        private double ADCRawToVoltage(byte adcValue)
-        {
-            return adcValue * VRef / 255.0;
-        }
-
         private static byte SineWave256(int index)
         {
             return (byte)(128 + (Math.Sin(index / 255.0 * 4 * Math.PI) * 128.0));
@@ -451,7 +447,7 @@ namespace Scope.UI.ViewModel
         {
             try
             {
-                var existingChannelConfig = ChannelConfigurationList.FromJson(Settings.Default.ChannelConfigurations);
+                var existingChannelConfig = JsonConvert.DeserializeObject<List<ChannelConfiguration>>(Settings.Default.ChannelConfigurations);
                 var totalChannels = Settings.Default.ADCChannels + Settings.Default.DACChannels;
                 if (existingChannelConfig.Count != totalChannels)
                 {
@@ -486,7 +482,7 @@ namespace Scope.UI.ViewModel
 
         private void InitializeNewChannelConfigurations()
         {
-            this.ChannelConfigurations = new ChannelConfigurationList();
+            this.ChannelConfigurations = new List<ChannelConfiguration>();
             var totalChannels = Settings.Default.ADCChannels + Settings.Default.DACChannels;
             var palette = new ColorPalette(totalChannels);
 
@@ -508,7 +504,7 @@ namespace Scope.UI.ViewModel
             }
             this.DataStreams.AddRange(this.adcStreams);
 
-            Settings.Default.ChannelConfigurations = this.ChannelConfigurations.ToJson();
+            Settings.Default.ChannelConfigurations = JsonConvert.SerializeObject(this.ChannelConfigurations);
             Settings.Default.Save();
         }
     }

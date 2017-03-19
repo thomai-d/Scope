@@ -67,7 +67,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\Visualization\Annotation.cs" />
-    <Compile Include="Controls\Visualization\ChannelConfigurationList.cs" />
     <Compile Include="Services\DialogService.cs" />
     <Compile Include="ViewModel\ChannelConfigurationViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
