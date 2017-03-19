@@ -18,6 +18,10 @@ using Scope.UI.Properties;
 using TMD;
 using TMD.Extensions;
 using TMD.Media;
+using Scope.UI.Services;
+using Scope.UI.Views;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace Scope.UI.ViewModel
 {
@@ -81,6 +85,7 @@ namespace Scope.UI.ViewModel
                 {
                     _IsConnected = value;
                     this.RaisePropertyChanged();
+                    this.InvalidateCommands();
                 }
             }
         }
@@ -95,6 +100,7 @@ namespace Scope.UI.ViewModel
                 {
                     _IsConnecting = value;
                     this.RaisePropertyChanged();
+                    this.InvalidateCommands();
                 }
             }
         }
@@ -109,6 +115,7 @@ namespace Scope.UI.ViewModel
                 {
                     _IsStreamStarted = value;
                     this.RaisePropertyChanged();
+                    this.InvalidateCommands();
                 }
             }
         }
@@ -188,9 +195,9 @@ namespace Scope.UI.ViewModel
             }
         }
 
-        public ObservableCollection<IBufferedStream<double>> DataStreams { get; } = new ObservableCollection<IBufferedStream<double>>();
+        public List<IBufferedStream<double>> DataStreams { get; } = new List<IBufferedStream<double>>();
 
-        public ObservableCollection<LineConfiguration> LineConfigurations { get; } = new ObservableCollection<LineConfiguration>();
+        public ChannelConfigurationList ChannelConfigurations { get; private set; } = new ChannelConfigurationList();
 
         #endregion
 
@@ -212,6 +219,7 @@ namespace Scope.UI.ViewModel
         public ICommand StartStreamCommand { get; }
         public ICommand StopStreamCommand { get; }
         public ICommand RefreshCOMPorts { get; }
+        public ICommand EditChannelConfigurationCommand { get; }
 
         #endregion
 
@@ -221,33 +229,9 @@ namespace Scope.UI.ViewModel
             this.StartStreamCommand = new RelayCommand(this.StartStreamCommandHandler, () => this.IsConnected && !this.IsStreamStarted);
             this.StopStreamCommand = new RelayCommand(this.StopStreamCommandHandler, () => this.IsConnected && this.IsStreamStarted);
             this.RefreshCOMPorts = new RelayCommand(this.RefreshCOMPortsHandler, () => !this.IsConnected);
+            this.EditChannelConfigurationCommand = new RelayCommand<ChannelConfiguration>(this.EditChannelConfigurationHandler);
 
-            var palette = new ColorPalette(Settings.Default.ADCChannels + Settings.Default.DACChannels);
-
-            // Setup DAC streams.
-            this.dacStreams = new IBufferedStream<double>[Settings.Default.DACChannels];
-            for (int n = 0; n < Settings.Default.DACChannels; n++)
-            {
-                this.dacStreams[n] = new BufferedStream<double>(StreamBufferSize);
-
-                if (n == 0)
-                this.LineConfigurations.Add(new LineConfiguration($"DAC{n}", palette.NextColor(), -5, 5, "V"));
-                else
-                this.LineConfigurations.Add(new LineConfiguration($"DAC{n}", palette.NextColor(), 0, 5, "V"));
-            }
-            this.DataStreams.AddRange(this.dacStreams);
-
-            // Setup ADC streams.
-            this.adcStreams = new IBufferedStream<double>[Settings.Default.ADCChannels];
-            for (int n = 0; n < Settings.Default.ADCChannels; n++)
-            {
-                this.adcStreams[n] = new BufferedStream<double>(StreamBufferSize);
-                this.LineConfigurations.Add(new LineConfiguration($"ADC{n}", palette.NextColor(), 0, 5, "V"));
-            }
-            this.DataStreams.AddRange(this.adcStreams);
-
-            foreach (var cfg in this.LineConfigurations)
-                cfg.IsVisibleChanged += this.OnRedrawRequested;
+            this.InitializeChannels();
 
             this.RefreshCOMPortsHandler();
         }
@@ -283,7 +267,6 @@ namespace Scope.UI.ViewModel
                 this.probe.BurstReceived += this.OnRedrawRequested;
 
                 this.IsConnecting = true;
-                CommandManager.InvalidateRequerySuggested();
 
                 await this.probe.OpenAsync();
                 this.IsConnected = true;
@@ -301,7 +284,6 @@ namespace Scope.UI.ViewModel
             finally
             {
                 this.IsConnecting = false;
-                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -323,7 +305,6 @@ namespace Scope.UI.ViewModel
             finally
             {
                 this.IsStreamStarted = false;
-                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -337,6 +318,13 @@ namespace Scope.UI.ViewModel
         {
             this.AvailableCOMPorts = SerialPort.GetPortNames();
             this.SelectedCOMPort = this.AvailableCOMPorts.FirstOrDefault(x => x == Settings.Default.ProbePort);
+        }
+
+        private void EditChannelConfigurationHandler(ChannelConfiguration config)
+        {
+            DialogService.ShowDialog<ChannelConfigurationView>(new ChannelConfigurationViewModel(config));
+            Settings.Default.ChannelConfigurations = this.ChannelConfigurations.ToJson();
+            Settings.Default.Save();
         }
 
         /* UI Callbacks */
@@ -421,9 +409,9 @@ namespace Scope.UI.ViewModel
         {
             int idx = 0;
             foreach (var stream in this.dacStreams)
-                this.LineConfigurations[idx++].CurrentValue = stream.Last(1)[0];
+                this.ChannelConfigurations[idx++].CurrentValue = stream.Last(1)[0];
             foreach (var stream in this.adcStreams)
-                this.LineConfigurations[idx++].CurrentValue = stream.Last(1)[0];
+                this.ChannelConfigurations[idx++].CurrentValue = stream.Last(1)[0];
 
             this.RedrawRequested?.Invoke(this, EventArgs.Empty);
         }
@@ -443,6 +431,85 @@ namespace Scope.UI.ViewModel
         private static byte SineWave256(int index)
         {
             return (byte)(128 + (Math.Sin(index / 255.0 * 4 * Math.PI) * 128.0));
+        }
+
+        /* Channel initializations */
+
+        private void InitializeChannels()
+        {
+            // Initialize channels.
+            if (string.IsNullOrEmpty(Settings.Default.ChannelConfigurations))
+                this.InitializeNewChannelConfigurations();
+            else
+                this.InitializeExistingChannelConfigurations();
+
+            foreach (var cfg in this.ChannelConfigurations)
+                cfg.IsVisibleChanged += this.OnRedrawRequested;
+        }
+
+        private void InitializeExistingChannelConfigurations()
+        {
+            try
+            {
+                var existingChannelConfig = ChannelConfigurationList.FromJson(Settings.Default.ChannelConfigurations);
+                var totalChannels = Settings.Default.ADCChannels + Settings.Default.DACChannels;
+                if (existingChannelConfig.Count != totalChannels)
+                {
+                    // Config does not match total channels. Reset.
+                    this.InitializeNewChannelConfigurations();
+                    return;
+                }
+
+                this.ChannelConfigurations = existingChannelConfig;
+
+                // Setup DAC streams.
+                this.dacStreams = new IBufferedStream<double>[Settings.Default.DACChannels];
+                for (int n = 0; n < Settings.Default.DACChannels; n++)
+                {
+                    this.dacStreams[n] = new BufferedStream<double>(StreamBufferSize);
+                }
+                this.DataStreams.AddRange(this.dacStreams);
+
+                // Setup ADC streams.
+                this.adcStreams = new IBufferedStream<double>[Settings.Default.ADCChannels];
+                for (int n = 0; n < Settings.Default.ADCChannels; n++)
+                {
+                    this.adcStreams[n] = new BufferedStream<double>(StreamBufferSize);
+                }
+                this.DataStreams.AddRange(this.adcStreams);
+            }
+            catch
+            {
+                this.InitializeNewChannelConfigurations();
+            }
+        }
+
+        private void InitializeNewChannelConfigurations()
+        {
+            this.ChannelConfigurations = new ChannelConfigurationList();
+            var totalChannels = Settings.Default.ADCChannels + Settings.Default.DACChannels;
+            var palette = new ColorPalette(totalChannels);
+
+            // Setup DAC streams.
+            this.dacStreams = new IBufferedStream<double>[Settings.Default.DACChannels];
+            for (int n = 0; n < Settings.Default.DACChannels; n++)
+            {
+                this.dacStreams[n] = new BufferedStream<double>(StreamBufferSize);
+                this.ChannelConfigurations.Add(new ChannelConfiguration($"DAC{n}", palette.NextColor(), 0, 5, "V"));
+            }
+            this.DataStreams.AddRange(this.dacStreams);
+
+            // Setup ADC streams.
+            this.adcStreams = new IBufferedStream<double>[Settings.Default.ADCChannels];
+            for (int n = 0; n < Settings.Default.ADCChannels; n++)
+            {
+                this.adcStreams[n] = new BufferedStream<double>(StreamBufferSize);
+                this.ChannelConfigurations.Add(new ChannelConfiguration($"ADC{n}", palette.NextColor(), 0, 5, "V"));
+            }
+            this.DataStreams.AddRange(this.adcStreams);
+
+            Settings.Default.ChannelConfigurations = this.ChannelConfigurations.ToJson();
+            Settings.Default.Save();
         }
     }
 

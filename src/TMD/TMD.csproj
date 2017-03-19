@@ -46,6 +46,7 @@
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\ColorExtension.cs" />
     <Compile Include="Media\ColorPalette.cs" />
+    <Compile Include="MVVM\BindingProxy.cs" />
     <Compile Include="MVVM\BooleanToVisibilityConverterEx.cs" />
     <Compile Include="MVVM\CompareConverter.cs" />
     <Compile Include="MVVM\EnumToBooleanConverter.cs" />

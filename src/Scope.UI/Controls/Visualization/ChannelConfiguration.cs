@@ -5,19 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Xml.Serialization;
 using TMD.MVVM;
 
 namespace Scope.UI.Controls.Visualization
 {
-    public class LineConfiguration : NotifyPropertyChanged
+    [Serializable]
+    public class ChannelConfiguration : NotifyPropertyChanged
     {
         public event EventHandler IsVisibleChanged;
 
-        public LineConfiguration(string name, Color color, double min, double max, string unit)
+        private ChannelConfiguration()
+        {
+            // Required for XmlSerialization.
+        }
+
+        public ChannelConfiguration(string name, Color color, double min, double max, string unit)
         {
             this.Name = name;
             this.Color = color;
             this.Unit = unit;
+            this.MinValue = min;
+            this.MaxValue = max;
         }
 
         #region NotifyProperties
@@ -51,6 +60,7 @@ namespace Scope.UI.Controls.Visualization
         }
 
         private Color _Color;
+        [XmlIgnore]
         public Color Color
         {
             get { return _Color; }
@@ -79,6 +89,7 @@ namespace Scope.UI.Controls.Visualization
         }
 
         private double _CurrentValue;
+        [XmlIgnore]
         public double CurrentValue
         {
             get { return _CurrentValue; }
@@ -122,5 +133,10 @@ namespace Scope.UI.Controls.Visualization
         }
 
         #endregion
+
+        public override string ToString()
+        {
+            return $"LineConfig '{this.Name}'; {this.MinValue} - {this.MaxValue} {this.Unit}; {this.Color}";
+        }
     }
 }

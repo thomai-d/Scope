@@ -8,6 +8,12 @@ namespace TMD.Extensions
 {
     public static class ArrayExtensions
     {
+        public static void ForEach<T>(this T[] arr, Action<T> action)
+        {
+            foreach (var item in arr)
+                action(item);
+        }
+
         public static bool EndsWith<T>(this T[] arr, T[] exp)
         {
             if (arr.Length < exp.Length)

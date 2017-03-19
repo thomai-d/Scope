@@ -24,7 +24,7 @@ namespace Scope.UI.Controls.Visualization
     public class StreamGraph : PixelCanvas
     {
         public static readonly DependencyProperty DataStreamsProperty = DependencyProperty.Register("DataStreams", typeof(ICollection<IBufferedStream<double>>), typeof(StreamGraph), new PropertyMetadata(null));
-        public static readonly DependencyProperty LineConfigurationsProperty = DependencyProperty.Register("LineConfigurations", typeof(IList<LineConfiguration>), typeof(StreamGraph), new PropertyMetadata(null));
+        public static readonly DependencyProperty LineConfigurationsProperty = DependencyProperty.Register("LineConfigurations", typeof(IList<ChannelConfiguration>), typeof(StreamGraph), new PropertyMetadata(null));
         public static readonly DependencyProperty GridColorProperty = DependencyProperty.Register("GridColor", typeof(Color), typeof(StreamGraph), new PropertyMetadata(Color.FromRgb(30, 30, 30)));
         public static readonly DependencyProperty MaxProperty = DependencyProperty.Register("Max", typeof(double), typeof(StreamGraph), new PropertyMetadata(5.1));
         public static readonly DependencyProperty MinProperty = DependencyProperty.Register("Min", typeof(double), typeof(StreamGraph), new PropertyMetadata(-5.1));
@@ -74,9 +74,9 @@ namespace Scope.UI.Controls.Visualization
             set { SetValue(DataStreamsProperty, value); }
         }
 
-        public IList<LineConfiguration> LineConfigurations
+        public IList<ChannelConfiguration> LineConfigurations
         {
-            get { return (IList<LineConfiguration>)GetValue(LineConfigurationsProperty); }
+            get { return (IList<ChannelConfiguration>)GetValue(LineConfigurationsProperty); }
             set { SetValue(LineConfigurationsProperty, value); }
         }
 
@@ -119,7 +119,7 @@ namespace Scope.UI.Controls.Visualization
             {
                 var buffer = stream.Last(this.RenderWidth);
 
-                LineConfiguration lineConfig;
+                ChannelConfiguration lineConfig;
                 if (!this.TryGetLineConfig(streamIndex, out lineConfig)
                     || !lineConfig.IsVisible)
                 {
@@ -132,13 +132,15 @@ namespace Scope.UI.Controls.Visualization
 
                 // Draw line.
                 int p = this.pos;
-                int lastY = this.ValueToY(buffer[p]);
+                var lastRealValue = lineConfig.MinValue + buffer[p] * (lineConfig.MaxValue - lineConfig.MinValue);
+                int lastY = this.ValueToY(lastRealValue);
                 for (int x = buffer.Length - 1; x >= 0; x--)
                 {
                     if (++p == buffer.Length)
                         p = 0;
 
-                    int y = this.ValueToY(buffer[p]);
+                    var currentRealValue = lineConfig.MinValue + buffer[p] * (lineConfig.MaxValue - lineConfig.MinValue);
+                    int y = this.ValueToY(currentRealValue);
                     this.Bitmap.DrawLine(x + 1, lastY, x, y, color);
                     lastY = y;
                 }
@@ -147,7 +149,7 @@ namespace Scope.UI.Controls.Visualization
             }
         }
 
-        private bool TryGetLineConfig(int streamIndex, out LineConfiguration config)
+        private bool TryGetLineConfig(int streamIndex, out ChannelConfiguration config)
         {
             if (this.LineConfigurations == null
                 || this.LineConfigurations.Count <= streamIndex)

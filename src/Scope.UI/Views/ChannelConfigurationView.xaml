@@ -1,0 +1,52 @@
+﻿<Window x:Class="Scope.UI.Views.ChannelConfigurationView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Scope.UI.Views"
+        mc:Ignorable="d" WindowStyle="ToolWindow" SizeToContent="WidthAndHeight"
+        Background="{StaticResource WindowBackgroundBrush}"
+        Title="Channel configuration" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+
+    <GroupBox>
+        <GroupBox.Header>
+            <TextBox Text="{Binding Configuration.Name, FallbackValue=Name, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+        </GroupBox.Header>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="30" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" /> <!-- Color -->
+                <RowDefinition Height="Auto" /> <!-- Minimum -->
+                <RowDefinition Height="Auto" /> <!-- Maximum -->
+                <RowDefinition Height="Auto" /> <!-- Unit -->
+            </Grid.RowDefinitions>
+
+            <!-- Color & Name -->
+            <Label Grid.Row="0" Content="Color" />
+            <Button Margin="0,2" Grid.Column="1" Width="30"  Height="18" HorizontalAlignment="Left">
+                <Rectangle Width="20" Height="10">
+                    <Rectangle.Fill>
+                        <SolidColorBrush Color="{Binding Configuration.Color}" />
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Button>
+
+            <!-- Min / Max -->
+            <Label Grid.Row="1" Content="Min" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Configuration.MinValue, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+            <Label Grid.Row="1" Grid.Column="2" Margin="3,0" Content="{Binding Configuration.Unit, FallbackValue=V}" />
+
+            <Label Grid.Row="2" Content="Max" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Configuration.MaxValue, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+            <Label Grid.Row="2" Grid.Column="2" Margin="3,0" Content="{Binding Configuration.Unit, FallbackValue=V}" />
+
+            <Label Grid.Row="3" Content="Unit" />
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Configuration.Unit, FallbackValue=V, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+    </GroupBox>
+</Window>

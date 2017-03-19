@@ -15,7 +15,10 @@
       <Value Profile="(Default)">2</Value>
     </Setting>
     <Setting Name="ADCChannels" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">4</Value>
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="ChannelConfigurations" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

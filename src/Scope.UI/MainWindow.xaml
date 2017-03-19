@@ -7,6 +7,7 @@
         xmlns:visu="clr-namespace:Scope.UI.Controls.Visualization"
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:vm="clr-namespace:Scope.UI.ViewModel"
+        xmlns:mvvm="clr-namespace:TMD.MVVM;assembly=TMD"
         mc:Ignorable="d" Title="Scope-UI" Width="1000" Height="600"
         Icon="logo.ico"
         Background="{StaticResource WindowBackgroundBrush}"
@@ -30,6 +31,8 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <mvvm:BindingProxy x:Key="ViewModelProxy" Data="{Binding}" />
 
     </Window.Resources>
 
@@ -88,7 +91,7 @@
 
             <Expander Header="Auto" IsExpanded="True" DockPanel.Dock="Bottom">
                 <StackPanel Orientation="Vertical">
-                    <ItemsControl ItemsSource="{Binding LineConfigurations}">
+                    <ItemsControl ItemsSource="{Binding ChannelConfigurations}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
@@ -98,13 +101,17 @@
                                             <SolidColorBrush Color="{Binding Color}" />
                                         </Ellipse.Fill>
                                     </Ellipse>
-                                    <TextBlock Margin="10,0">
+                                    <TextBlock Margin="10,-1,10,1">
                                         <Run Text="{Binding Name}" />
                                         <Run Text="(" />
                                         <Run Text="{Binding CurrentValue, FallbackValue=0.00, StringFormat=0.00}" />
                                         <Run Text="{Binding Unit}" />
                                         <Run Text=")" />
                                     </TextBlock>
+
+                                    <Button Command="{Binding Data.EditChannelConfigurationCommand, Source={StaticResource ViewModelProxy}}" 
+                                            CommandParameter="{Binding}"
+                                            Margin="0" FontSize="6" Content="EDIT" VerticalAlignment="Center" />
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -200,7 +207,7 @@
 
         </DockPanel>
 
-        <visu:StreamGraph Grid.Row="1" x:Name="StreamGraph" DataStreams="{Binding DataStreams}" LineConfigurations="{Binding LineConfigurations}" />
+        <visu:StreamGraph Grid.Row="1" x:Name="StreamGraph" DataStreams="{Binding DataStreams}" LineConfigurations="{Binding ChannelConfigurations}" />
 
     </DockPanel>
 </Window>

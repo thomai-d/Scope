@@ -73,13 +73,25 @@ namespace Scope.UI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int ADCChannels {
             get {
                 return ((int)(this["ADCChannels"]));
             }
             set {
                 this["ADCChannels"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ChannelConfigurations {
+            get {
+                return ((string)(this["ChannelConfigurations"]));
+            }
+            set {
+                this["ChannelConfigurations"] = value;
             }
         }
     }

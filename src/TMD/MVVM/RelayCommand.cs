@@ -1,45 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace TMD.MVVM
 {
-    public class RelayCommand : ICommand
+    public class RelayCommand<T> : ICommand
     {
-        public event EventHandler CanExecuteChanged
+        public RelayCommand(Action<T> executeAction)
+            : this()
         {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
+            if (executeAction == null)
+                throw new ArgumentNullException("executeAction");
+            this.ExecuteAction = executeAction;
         }
-        private Action methodToExecute;
-        private Func<bool> canExecuteEvaluator;
-        public RelayCommand(Action methodToExecute, Func<bool> canExecuteEvaluator)
+
+        public RelayCommand(Action<T> executeAction, Func<T, bool> canExecuteFunc)
         {
-            this.methodToExecute = methodToExecute;
-            this.canExecuteEvaluator = canExecuteEvaluator;
+            if (executeAction == null)
+                throw new ArgumentNullException("executeAction");
+            if (canExecuteFunc == null)
+                throw new ArgumentNullException("canExecuteFunc");
+            this.ExecuteAction = executeAction;
+            this.CanExecuteFunc = canExecuteFunc;
         }
-        public RelayCommand(Action methodToExecute)
-            : this(methodToExecute, null)
+
+        protected RelayCommand()
         {
+            this.ExecuteAction = p => { };
+            this.CanExecuteFunc = p => true;
         }
-        public bool CanExecute(object parameter)
+
+        public event EventHandler CanExecuteChanged;
+
+        protected Action<T> ExecuteAction { get; set; }
+
+        protected Func<T, bool> CanExecuteFunc { get; set; }
+
+        public virtual bool CanExecute(object parameter)
         {
-            if (this.canExecuteEvaluator == null)
+            if (parameter is T)
+                return this.CanExecuteFunc((T)parameter);
+            return this.CanExecuteFunc(default(T));
+        }
+
+        public virtual void Execute(object parameter)
+        {
+            if (this.CanExecute(parameter))
             {
-                return true;
-            }
-            else
-            {
-                bool result = this.canExecuteEvaluator.Invoke();
-                return result;
+                var param = parameter is T
+                    ? (T)parameter
+                    : default(T);
+
+                this.ExecuteAction(param);
             }
         }
-        public void Execute(object parameter)
+
+        public void ReEvaluate()
         {
-            this.methodToExecute.Invoke();
+            this.CanExecuteChanged?.Invoke(this, new EventArgs());
+        }
+    }
+
+    public class RelayCommand : RelayCommand<object>
+    {
+        public RelayCommand(Action executeAction)
+            : base(x => executeAction())
+        {
+        }
+
+        public RelayCommand(Action executeAction, Func<bool> canExecuteFunc)
+            : base(x => executeAction(), x => canExecuteFunc())
+        {
         }
     }
 }

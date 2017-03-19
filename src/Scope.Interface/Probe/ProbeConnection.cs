@@ -140,7 +140,7 @@ namespace Scope.Interface.Probe
                 // Read samples.
                 for (int adcStreamIndex = 0; adcStreamIndex < adcStreams.Length; adcStreamIndex++)
                 {
-                    var value = (double)buffer[adcStreamIndex] / 255 * 5.0;
+                    var value = (double)buffer[adcStreamIndex] / 255;
                     adcStreams[adcStreamIndex].Push(value);
                 }
 
