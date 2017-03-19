@@ -13,7 +13,7 @@ namespace Scope.UI.Controls.Visualization
     {
         public event EventHandler IsVisibleChanged;
 
-        public LineConfiguration(string name, Color color, string unit)
+        public LineConfiguration(string name, Color color, double min, double max, string unit)
         {
             this.Name = name;
             this.Color = color;
@@ -21,6 +21,34 @@ namespace Scope.UI.Controls.Visualization
         }
 
         #region NotifyProperties
+
+        private double _MinValue;
+        public double MinValue
+        {
+            get { return _MinValue; }
+            set
+            {
+                if (value != _MinValue)
+                {
+                    _MinValue = value;
+                    this.RaisePropertyChanged();
+                }
+            }
+        }
+
+        private double _MaxValue;
+        public double MaxValue
+        {
+            get { return _MaxValue; }
+            set
+            {
+                if (value != _MaxValue)
+                {
+                    _MaxValue = value;
+                    this.RaisePropertyChanged();
+                }
+            }
+        }
 
         private Color _Color;
         public Color Color

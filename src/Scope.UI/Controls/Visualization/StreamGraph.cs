@@ -27,7 +27,7 @@ namespace Scope.UI.Controls.Visualization
         public static readonly DependencyProperty LineConfigurationsProperty = DependencyProperty.Register("LineConfigurations", typeof(IList<LineConfiguration>), typeof(StreamGraph), new PropertyMetadata(null));
         public static readonly DependencyProperty GridColorProperty = DependencyProperty.Register("GridColor", typeof(Color), typeof(StreamGraph), new PropertyMetadata(Color.FromRgb(30, 30, 30)));
         public static readonly DependencyProperty MaxProperty = DependencyProperty.Register("Max", typeof(double), typeof(StreamGraph), new PropertyMetadata(5.1));
-        public static readonly DependencyProperty MinProperty = DependencyProperty.Register("Min", typeof(double), typeof(StreamGraph), new PropertyMetadata(-0.1));
+        public static readonly DependencyProperty MinProperty = DependencyProperty.Register("Min", typeof(double), typeof(StreamGraph), new PropertyMetadata(-5.1));
         public static readonly DependencyPropertyKey AnnotationsPropertyKey;
         public static readonly DependencyProperty AnnotationsProperty;
 
@@ -118,10 +118,12 @@ namespace Scope.UI.Controls.Visualization
             foreach (var stream in this.DataStreams)
             {
                 var buffer = stream.Last(this.RenderWidth);
+
                 LineConfiguration lineConfig;
                 if (!this.TryGetLineConfig(streamIndex, out lineConfig)
                     || !lineConfig.IsVisible)
                 {
+                    // No configuration for this line => ignore.
                     streamIndex++;
                     continue;
                 }
@@ -172,7 +174,7 @@ namespace Scope.UI.Controls.Visualization
         private void RecalculateGrid()
         {
             var range = this.Max - this.Min;
-            var decimals = Math.Floor(Math.Log10(range));
+            var decimals = Math.Floor(Math.Log10(range * 0.9));
             var step = Math.Pow(10, decimals);
 
             var annotations = new List<Annotation>();
@@ -182,10 +184,7 @@ namespace Scope.UI.Controls.Visualization
                 var top = this.ValueToY(y);
                 gridLines.Add(new Tuple<int, double>(top, y));
 
-                if (y != 0)
-                {
-                    annotations.Add(new Annotation { X = 3, Y = top, Text = $"{y} V" });
-                }
+                annotations.Add(new Annotation { X = 3, Y = top - 8, Text = $"{y} V" });
             }
 
             this.verticalGridLines = gridLines.ToArray();

@@ -229,7 +229,11 @@ namespace Scope.UI.ViewModel
             for (int n = 0; n < Settings.Default.DACChannels; n++)
             {
                 this.dacStreams[n] = new BufferedStream<double>(StreamBufferSize);
-                this.LineConfigurations.Add(new LineConfiguration($"DAC{n}", palette.NextColor(), "V"));
+
+                if (n == 0)
+                this.LineConfigurations.Add(new LineConfiguration($"DAC{n}", palette.NextColor(), -5, 5, "V"));
+                else
+                this.LineConfigurations.Add(new LineConfiguration($"DAC{n}", palette.NextColor(), 0, 5, "V"));
             }
             this.DataStreams.AddRange(this.dacStreams);
 
@@ -238,7 +242,7 @@ namespace Scope.UI.ViewModel
             for (int n = 0; n < Settings.Default.ADCChannels; n++)
             {
                 this.adcStreams[n] = new BufferedStream<double>(StreamBufferSize);
-                this.LineConfigurations.Add(new LineConfiguration($"ADC{n}", palette.NextColor(), "V"));
+                this.LineConfigurations.Add(new LineConfiguration($"ADC{n}", palette.NextColor(), 0, 5, "V"));
             }
             this.DataStreams.AddRange(this.adcStreams);
 
