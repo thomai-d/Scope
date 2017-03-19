@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -156,6 +157,9 @@ namespace Scope.UI.Controls.Visualization
 
         public void RecalculateGrid()
         {
+            if (DesignerProperties.GetIsInDesignMode(this))
+                return;
+
             if (this.LineConfigurations == null
                 || !this.LineConfigurations.Any())
             {
@@ -186,6 +190,7 @@ namespace Scope.UI.Controls.Visualization
 
             this.verticalGridLines = gridLines.ToArray();
             this.Annotations = annotations;
+
             this.Render();
         }
 
