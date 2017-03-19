@@ -24,10 +24,9 @@ namespace Scope.UI.Controls.Visualization
     public class StreamGraph : PixelCanvas
     {
         public static readonly DependencyProperty DataStreamsProperty = DependencyProperty.Register("DataStreams", typeof(ICollection<IBufferedStream<double>>), typeof(StreamGraph), new PropertyMetadata(null));
-        public static readonly DependencyProperty LineConfigurationsProperty = DependencyProperty.Register("LineConfigurations", typeof(IList<ChannelConfiguration>), typeof(StreamGraph), new PropertyMetadata(null));
+        public static readonly DependencyProperty LineConfigurationsProperty = DependencyProperty.Register("LineConfigurations", typeof(IList<ChannelConfiguration>), typeof(StreamGraph), new PropertyMetadata(null, LineConfigurationsChanged));
+
         public static readonly DependencyProperty GridColorProperty = DependencyProperty.Register("GridColor", typeof(Color), typeof(StreamGraph), new PropertyMetadata(Color.FromRgb(30, 30, 30)));
-        public static readonly DependencyProperty MaxProperty = DependencyProperty.Register("Max", typeof(double), typeof(StreamGraph), new PropertyMetadata(5.1));
-        public static readonly DependencyProperty MinProperty = DependencyProperty.Register("Min", typeof(double), typeof(StreamGraph), new PropertyMetadata(-5.1));
         public static readonly DependencyPropertyKey AnnotationsPropertyKey;
         public static readonly DependencyProperty AnnotationsProperty;
 
@@ -35,6 +34,7 @@ namespace Scope.UI.Controls.Visualization
 
         private int verticalCenter;
         private int pos;
+        private double min = 0, max = 0;
 
         private Tuple<int, double>[] verticalGridLines;
 
@@ -54,18 +54,6 @@ namespace Scope.UI.Controls.Visualization
         {
             get { return (Color)GetValue(GridColorProperty); }
             set { SetValue(GridColorProperty, value); }
-        }
-
-        public double Max
-        {
-            get { return (double)GetValue(MaxProperty); }
-            set { SetValue(MaxProperty, value); }
-        }
-
-        public double Min
-        {
-            get { return (double)GetValue(MinProperty); }
-            set { SetValue(MinProperty, value); }
         }
 
         public ICollection<IBufferedStream<double>> DataStreams
@@ -99,7 +87,7 @@ namespace Scope.UI.Controls.Visualization
 
         protected override void OnRender(BitmapContext ctx)
         {
-            if (this.RenderWidth == 0)
+            if (this.RenderWidth == 0 || this.verticalGridLines == null)
                 return;
 
             this.Bitmap.Clear(Colors.Black);
@@ -149,6 +137,63 @@ namespace Scope.UI.Controls.Visualization
             }
         }
 
+        private static void LineConfigurationsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var me = (StreamGraph)d;
+            me.RecalculateGrid();
+        }
+
+        // Helper functions.
+
+        private int ValueToY(double value)
+        {
+            var range = this.max - this.min;
+
+            var v = (value - this.min) / range * this.RenderHeight;
+
+            return this.RenderHeight - (int)v;
+        }
+
+        public void RecalculateGrid()
+        {
+            if (this.LineConfigurations == null
+                || !this.LineConfigurations.Any())
+            {
+                this.min = 0;
+                this.max = 0;
+                return;
+            }
+
+            // Auto range.
+            this.min = this.LineConfigurations.Min(c => c.MinValue);
+            this.max = this.LineConfigurations.Max(c => c.MaxValue);
+            var range = this.max - this.min;
+            this.min -= range / 20;
+            this.max += range / 20;
+
+            var decimals = Math.Floor(Math.Log10(range * 0.9));
+            var step = Math.Pow(10, decimals);
+
+            var annotations = new List<Annotation>();
+            var gridLines = new List<Tuple<int, double>>();
+            for (double y = Round(this.min, step); y < this.max; y += step)
+            {
+                var top = this.ValueToY(y);
+                gridLines.Add(new Tuple<int, double>(top, y));
+
+                annotations.Add(new Annotation { X = 3, Y = top - 8, Text = $"{y} V" });
+            }
+
+            this.verticalGridLines = gridLines.ToArray();
+            this.Annotations = annotations;
+            this.Render();
+        }
+
+        private static double Round(double value, double step)
+        {
+            return value - (value % step);
+        }
+
         private bool TryGetLineConfig(int streamIndex, out ChannelConfiguration config)
         {
             if (this.LineConfigurations == null
@@ -160,42 +205,6 @@ namespace Scope.UI.Controls.Visualization
 
             config = this.LineConfigurations[streamIndex];
             return true;
-        }
-
-        // Helper functions.
-
-        private int ValueToY(double value)
-        {
-            var range = this.Max - this.Min;
-
-            var v = (value - this.Min) / range * this.RenderHeight;
-
-            return this.RenderHeight - (int)v;
-        }
-
-        private void RecalculateGrid()
-        {
-            var range = this.Max - this.Min;
-            var decimals = Math.Floor(Math.Log10(range * 0.9));
-            var step = Math.Pow(10, decimals);
-
-            var annotations = new List<Annotation>();
-            var gridLines = new List<Tuple<int, double>>();
-            for (double y = Round(this.Min, step); y < this.Max; y += step)
-            {
-                var top = this.ValueToY(y);
-                gridLines.Add(new Tuple<int, double>(top, y));
-
-                annotations.Add(new Annotation { X = 3, Y = top - 8, Text = $"{y} V" });
-            }
-
-            this.verticalGridLines = gridLines.ToArray();
-            this.Annotations = annotations;
-        }
-
-        private static double Round(double value, double step)
-        {
-            return value - (value % step);
         }
     }
 } 

@@ -23,6 +23,7 @@ namespace Scope.UI
 
             this.mainViewModel = new MainViewModel();
             this.mainViewModel.RedrawRequested += (s, e) => this.StreamGraph.Render();
+            this.mainViewModel.RedrawGridRequested += (s, e) => this.StreamGraph.RecalculateGrid();
             this.DataContext = this.mainViewModel;
         }
 

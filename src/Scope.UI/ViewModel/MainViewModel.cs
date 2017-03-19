@@ -211,6 +211,7 @@ namespace Scope.UI.ViewModel
         #region Events
 
         public event EventHandler RedrawRequested;
+        public event EventHandler RedrawGridRequested;
 
         #endregion
 
@@ -326,6 +327,8 @@ namespace Scope.UI.ViewModel
             DialogService.ShowDialog<ChannelConfigurationView>(new ChannelConfigurationViewModel(config));
             Settings.Default.ChannelConfigurations = JsonConvert.SerializeObject(this.ChannelConfigurations);
             Settings.Default.Save();
+
+            this.OnRedrawGridRequested();
         }
 
         /* UI Callbacks */
@@ -405,6 +408,11 @@ namespace Scope.UI.ViewModel
         }
 
         /* View Helper */
+
+        private void OnRedrawGridRequested()
+        {
+            this.RedrawGridRequested?.Invoke(this, EventArgs.Empty);
+        }
 
         private void OnRedrawRequested(object sender, EventArgs args)
         {
