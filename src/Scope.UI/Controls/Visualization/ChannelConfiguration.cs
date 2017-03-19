@@ -138,5 +138,10 @@ namespace Scope.UI.Controls.Visualization
         {
             return $"LineConfig '{this.Name}'; {this.MinValue} - {this.MaxValue} {this.Unit}; {this.Color}";
         }
+
+        internal void SetCurrentValueRaw(double v)
+        {
+            this.CurrentValue = this.MinValue + v * (this.MaxValue - this.MinValue);
+        }
     }
 }

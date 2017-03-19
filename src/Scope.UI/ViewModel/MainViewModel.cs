@@ -410,9 +410,15 @@ namespace Scope.UI.ViewModel
         {
             int idx = 0;
             foreach (var stream in this.dacStreams)
-                this.ChannelConfigurations[idx++].CurrentValue = stream.Last(1)[0];
+            {
+                var config = this.ChannelConfigurations[idx++];
+                config.SetCurrentValueRaw(stream.Last(1)[0]);
+            }
             foreach (var stream in this.adcStreams)
-                this.ChannelConfigurations[idx++].CurrentValue = stream.Last(1)[0];
+            {
+                var config = this.ChannelConfigurations[idx++];
+                config.SetCurrentValueRaw(stream.Last(1)[0]);
+            }
 
             this.RedrawRequested?.Invoke(this, EventArgs.Empty);
         }

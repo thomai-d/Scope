@@ -89,30 +89,32 @@
                 </StackPanel>
             </Expander>
 
-            <Expander Header="Auto" IsExpanded="True" DockPanel.Dock="Bottom">
+            <Expander Header="Current values" IsExpanded="True" DockPanel.Dock="Bottom">
                 <StackPanel Orientation="Vertical">
                     <ItemsControl ItemsSource="{Binding ChannelConfigurations}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <DockPanel Margin="0,2" LastChildFill="False">
                                     <CheckBox IsChecked="{Binding IsVisible}" />
                                     <Ellipse Style="{StaticResource IndicatorEllipse}">
                                         <Ellipse.Fill>
                                             <SolidColorBrush Color="{Binding Color}" />
                                         </Ellipse.Fill>
                                     </Ellipse>
-                                    <TextBlock Margin="10,-1,10,1">
-                                        <Run Text="{Binding Name}" />
-                                        <Run Text="(" />
-                                        <Run Text="{Binding CurrentValue, FallbackValue=0.00, StringFormat=0.00}" />
-                                        <Run Text="{Binding Unit}" />
-                                        <Run Text=")" />
+                                    <TextBlock Margin="10,0">
+                                        <Hyperlink Command="{Binding Data.EditChannelConfigurationCommand, Source={StaticResource ViewModelProxy}}" 
+                                                   CommandParameter="{Binding}">
+                                            <Run Text="{Binding Name}" />
+                                        </Hyperlink>
                                     </TextBlock>
 
-                                    <Button Command="{Binding Data.EditChannelConfigurationCommand, Source={StaticResource ViewModelProxy}}" 
-                                            CommandParameter="{Binding}"
-                                            Margin="0" FontSize="6" Content="EDIT" VerticalAlignment="Center" />
-                                </StackPanel>
+                                    <TextBlock DockPanel.Dock="Right">
+                                            <Run Text="(" />
+                                            <Run Text="{Binding CurrentValue, FallbackValue=0.00, StringFormat=0.00}" />
+                                            <Run Text="{Binding Unit}" />
+                                            <Run Text=")" />
+                                    </TextBlock>
+                                </DockPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

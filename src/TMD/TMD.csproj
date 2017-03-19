@@ -52,7 +52,7 @@
     <Compile Include="MVVM\EnumToBooleanConverter.cs" />
     <Compile Include="MVVM\IfEmptyConverter.cs" />
     <Compile Include="MVVM\InvertConverter.cs" />
-    <Compile Include="MVVM\NPCBase.cs" />
+    <Compile Include="MVVM\NotifyPropertyChanged.cs" />
     <Compile Include="MVVM\RelayCommand.cs" />
     <Compile Include="MVVM\ViewModelBase.cs" />
     <Compile Include="Extensions\ObservableCollectionExtension.cs" />

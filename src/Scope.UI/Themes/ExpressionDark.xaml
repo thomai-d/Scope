@@ -76,6 +76,9 @@
     <SolidColorBrush x:Key="DefaultedBorderBrush" Color="{StaticResource DefaultColor}" />
     <SolidColorBrush x:Key="SolidBorderBrush" Color="#888" />
 
+    <Style TargetType="Hyperlink">
+        <Setter Property="Foreground" Value="White" />
+    </Style>
 
     <Style x:Key="NuclearButtonFocusVisual">
         <Setter Property="Control.Template">

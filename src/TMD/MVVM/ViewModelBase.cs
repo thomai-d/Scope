@@ -17,6 +17,13 @@ namespace TMD.MVVM
 
         private RelayCommand[] commands = { };
 
+        public RelayCommand CloseCommand { get; }
+
+        public ViewModelBase()
+        {
+            this.CloseCommand = new RelayCommand(() => this.OnCloseRequested());
+        }
+
         public virtual void OnViewLoaded()
         {
             // Initialize commands for InvalidateCommands()
