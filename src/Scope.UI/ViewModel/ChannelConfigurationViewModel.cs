@@ -1,4 +1,4 @@
-﻿using Scope.UI.Controls.Visualization;
+﻿using TMD.Controls.Visualization;
 using System;
 using System.Collections.Generic;
 using System.Linq;

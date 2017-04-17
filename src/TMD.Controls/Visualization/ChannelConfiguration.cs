@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Xml.Serialization;
 using TMD.MVVM;
 
-namespace Scope.UI.Controls.Visualization
+namespace TMD.Controls.Visualization
 {
     [Serializable]
     public class ChannelConfiguration : NotifyPropertyChanged

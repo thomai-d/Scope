@@ -17,7 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace Scope.UI.Controls.Visualization
+namespace TMD.Controls.Visualization
 {
     /// <summary>
     /// Visualizes a stream of data.

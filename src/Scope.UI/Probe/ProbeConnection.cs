@@ -1,4 +1,5 @@
 ﻿using Scope.Data;
+using Scope.UI.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -47,7 +48,7 @@ namespace Scope.Interface.Probe
 
             return Task.Run(async () =>
             {
-                await Task.Delay(Interface.Properties.Settings.Default.BootDelayMs);
+                await Task.Delay(Settings.Default.BootDelayMs);
 
                 var data = this.ReadAll();
                 if (!data.EndsWith(Magic.WelcomeBytes))

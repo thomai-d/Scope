@@ -6,7 +6,6 @@ using System.Windows;
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Threading.Tasks;
-using Scope.UI.Controls.Visualization;
 using Scope.Interface.Probe;
 using Scope.Properties;
 using Scope.UI.ViewModel;

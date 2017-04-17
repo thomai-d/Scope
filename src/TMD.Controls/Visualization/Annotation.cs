@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TMD.MVVM;
 
-namespace Scope.UI.Controls.Visualization
+namespace TMD.Controls.Visualization
 {
     public class Annotation : NotifyPropertyChanged
     {

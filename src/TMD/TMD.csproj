@@ -43,6 +43,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\BufferedStream.cs" />
+    <Compile Include="Data\IBufferedStream.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\ColorExtension.cs" />
     <Compile Include="Media\ColorPalette.cs" />

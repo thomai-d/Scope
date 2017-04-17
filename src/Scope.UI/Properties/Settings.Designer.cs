@@ -94,5 +94,17 @@ namespace Scope.UI.Properties {
                 this["ChannelConfigurations"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
+        public int BootDelayMs {
+            get {
+                return ((int)(this["BootDelayMs"]));
+            }
+            set {
+                this["BootDelayMs"] = value;
+            }
+        }
     }
 }

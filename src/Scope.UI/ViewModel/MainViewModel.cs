@@ -1,5 +1,4 @@
-﻿using Scope.UI.Controls.Visualization;
-using Scope.Interface.Probe;
+﻿using Scope.Interface.Probe;
 using Scope.Properties;
 using System;
 using System.Collections.Generic;
@@ -24,6 +23,7 @@ using System.Xml.Serialization;
 using System.IO;
 using Newtonsoft.Json;
 using System.Windows.Threading;
+using TMD.Controls.Visualization;
 
 namespace Scope.UI.ViewModel
 {
@@ -326,6 +326,7 @@ namespace Scope.UI.ViewModel
         {
             this.AvailableCOMPorts = SerialPort.GetPortNames();
             this.SelectedCOMPort = this.AvailableCOMPorts.FirstOrDefault(x => x == Settings.Default.ProbePort);
+            this.InvalidateCommands();
         }
 
         private void EditChannelConfigurationHandler(ChannelConfiguration config)

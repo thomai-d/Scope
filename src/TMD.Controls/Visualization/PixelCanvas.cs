@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using TMD.Tools;
 
-namespace Scope.UI.Controls.Visualization
+namespace TMD.Controls.Visualization
 {
     public class PixelCanvas : Control
     {

@@ -66,7 +66,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Controls\Visualization\Annotation.cs" />
+    <Compile Include="Probe\CommandProtocolException.cs" />
+    <Compile Include="Probe\ProbeConnection.cs" />
+    <Compile Include="Probe\Protocol.cs" />
     <Compile Include="Services\DialogService.cs" />
     <Compile Include="ViewModel\ChannelConfigurationViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
@@ -81,21 +83,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\Visualization\ChannelConfiguration.cs" />
-    <Compile Include="Controls\Visualization\PixelCanvas.cs" />
-    <Compile Include="Controls\Visualization\StreamGraph.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Themes\ExpressionDark.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\Generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Views\ChannelConfigurationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -133,9 +124,9 @@
     <Resource Include="logo.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Scope.Interface\Scope.Interface.csproj">
-      <Project>{81219b90-b542-4d07-adb1-7fbee356646c}</Project>
-      <Name>Scope.Interface</Name>
+    <ProjectReference Include="..\TMD.Controls\TMD.Controls.csproj">
+      <Project>{bd06d720-7bfc-4917-b64a-4f05de9207b2}</Project>
+      <Name>TMD.Controls</Name>
     </ProjectReference>
     <ProjectReference Include="..\TMD\TMD.csproj">
       <Project>{644407ee-4e7a-46b0-9411-73a9aeb1b89b}</Project>
