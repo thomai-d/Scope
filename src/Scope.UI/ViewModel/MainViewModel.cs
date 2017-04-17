@@ -23,6 +23,7 @@ using Scope.UI.Views;
 using System.Xml.Serialization;
 using System.IO;
 using Newtonsoft.Json;
+using System.Windows.Threading;
 
 namespace Scope.UI.ViewModel
 {
@@ -36,6 +37,8 @@ namespace Scope.UI.ViewModel
 
         private ProbeConnection probe;
         private CancellationTokenSource streamCancellationToken;
+
+        private DispatcherTimer uiRefreshTimer;
 
         #region Stream/Config-fields
 
@@ -117,6 +120,10 @@ namespace Scope.UI.ViewModel
                     _IsStreamStarted = value;
                     this.RaisePropertyChanged();
                     this.InvalidateCommands();
+                    if (value)
+                        this.uiRefreshTimer.Start();
+                    else
+                        this.uiRefreshTimer.Stop();
                 }
             }
         }
@@ -233,6 +240,10 @@ namespace Scope.UI.ViewModel
             this.RefreshCOMPorts = new RelayCommand(this.RefreshCOMPortsHandler, () => !this.IsConnected);
             this.EditChannelConfigurationCommand = new RelayCommand<ChannelConfiguration>(this.EditChannelConfigurationHandler);
 
+            this.uiRefreshTimer = new DispatcherTimer(DispatcherPriority.Render, Dispatcher.CurrentDispatcher);
+            this.uiRefreshTimer.Interval = TimeSpan.FromMilliseconds(100);
+            this.uiRefreshTimer.Tick += this.OnRedrawRequested;
+
             this.InitializeChannels();
 
             this.RefreshCOMPortsHandler();
@@ -262,12 +273,7 @@ namespace Scope.UI.ViewModel
 
             try
             {
-                if (this.probe != null)
-                    this.probe.BurstReceived -= this.OnRedrawRequested;
-
                 this.probe = new ProbeConnection(this.SelectedCOMPort, Settings.Default.ProbeBaud);
-                this.probe.BurstReceived += this.OnRedrawRequested;
-
                 this.IsConnecting = true;
 
                 await this.probe.OpenAsync();

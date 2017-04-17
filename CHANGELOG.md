@@ -3,6 +3,7 @@
 - Channel configurations are editable by the user (i.e. for measuring voltages when using a voltage divider)
 - Restarting the sample stream does no more clear the scope data.
 - Reduced noise by throwing away first ADC sample.
+- Fixed display lag at high sample rates.
 
 # Version 0.1 (2017-03-18)
 - First release
