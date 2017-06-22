@@ -50,11 +50,16 @@ void loop()
 		}
 	
 	case SetDAC0Command:
-		cmd_setDAC0();
+		cmd_setPoti0();
+		//cmd_setDAC0();
 		break;
 
 	case SetDAC1Command:
 		cmd_setDAC1();
+		break;
+
+	case SetPoti0Command:
+		cmd_setPoti0();
 		break;
 
 	case GetADCCommand:
@@ -225,6 +230,17 @@ void cmd_setDAC1()
 {
 	byte value = upstream_readByte();
 	dac.outputB(value);
+}
+
+void cmd_setPoti0()
+{
+	SPI.begin();
+	byte value = upstream_readByte();
+	digitalWrite(DO_4151_CS, LOW);
+	SPI.transfer((value >> 8) & 0b00000001);
+	SPI.transfer(value & 0xff);
+	digitalWrite(DO_4151_CS, HIGH);
+	SPI.end();
 }
 
 void cmd_getADC()

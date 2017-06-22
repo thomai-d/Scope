@@ -342,9 +342,6 @@ namespace Scope.UI.ViewModel
 
         private void OnDAC0ValueChanged(int newValue)
         {
-            if (!this.IsStreamStarted)
-                return;
-
             try
             {
                 newValue = Math.Min(Math.Max(0, newValue), 255);
@@ -362,9 +359,6 @@ namespace Scope.UI.ViewModel
 
         private void OnDAC1ValueChanged(int newValue)
         {
-            if (!this.IsStreamStarted)
-                return;
-
             try
             {
                 newValue = Math.Min(Math.Max(0, newValue), 255);

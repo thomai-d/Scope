@@ -5,6 +5,7 @@
 
 #define DO_BEEPER		4	
 #define DO_4902_CS		9
+#define DO_4151_CS		10
 
 #define OFF		LOW
 #define ON		HIGH

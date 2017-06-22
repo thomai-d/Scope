@@ -13,6 +13,7 @@
 #define SetDAC1BufferCommand		0x36	/* '6' */
 #define DisableDAC0BufferCommand	0x37	/* '7' */
 #define DisableDAC1BufferCommand	0x38	/* '8' */
+#define SetPoti0Command				0x39	/* '9' */
 
 // Responses
 #define AckResponse				0x40	/* '@' */

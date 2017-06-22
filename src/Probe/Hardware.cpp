@@ -9,6 +9,10 @@ void hardware_init()
 	bitSet(ADCSRA, ADPS2);
 	bitClear(ADCSRA, ADPS1);
 	bitClear(ADCSRA, ADPS0);
+
+	// Initialize 4151.
+	pinMode(DO_4151_CS, OUTPUT);
+	digitalWrite(DO_4151_CS, HIGH);
 }
 
 void beep(uint8_t times)
