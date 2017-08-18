@@ -50,8 +50,7 @@ void loop()
 		}
 	
 	case SetDAC0Command:
-		cmd_setPoti0();
-		//cmd_setDAC0();
+		cmd_setDAC0();
 		break;
 
 	case SetDAC1Command:
@@ -235,9 +234,9 @@ void cmd_setDAC1()
 void cmd_setPoti0()
 {
 	SPI.begin();
-	byte value = upstream_readByte();
+	uint16_t value = upstream_readWord();
 	digitalWrite(DO_4151_CS, LOW);
-	SPI.transfer((value >> 8) & 0b00000001);
+	SPI.transfer(value >> 8);
 	SPI.transfer(value & 0xff);
 	digitalWrite(DO_4151_CS, HIGH);
 	SPI.end();
@@ -280,13 +279,16 @@ void stream_processNextCommand(bool &cancel)
 	{
 		cancel = true;
 	}
-
-	if (cmd == SetDAC0Command)
+	else if (cmd == SetDAC0Command)
 	{
 		cmd_setDAC0();
 	}
-	if (cmd == SetDAC1Command)
+	else if (cmd == SetDAC1Command)
 	{
 		cmd_setDAC1();
+	}
+	else if (cmd == SetPoti0Command)
+	{
+		cmd_setPoti0();
 	}
 }

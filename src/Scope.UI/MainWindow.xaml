@@ -155,7 +155,7 @@
 
                     <!-- User -->
                     <RadioButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding Dac0Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.User}}" Content="User" />
-                    <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center" LastChildFill="True" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                    <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center" LastChildFill="True" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted}">
                         <Label Content="{Binding LineConfigurations[0].CurrentValue, FallbackValue=0.00 V}" ContentStringFormat="0.00 V" DockPanel.Dock="Right" />
                         <Slider Minimum="0" Maximum="255" Value="{Binding DAC0Value}" SmallChange="1" LargeChange="10" Margin="5,0" IsEnabled="{Binding Dac0Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.User}}" />
                     </DockPanel>
@@ -197,9 +197,29 @@
 
                     <!-- User -->
                     <RadioButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding Dac1Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.User}}" Content="User" />
-                    <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center" LastChildFill="True" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted, Converter={StaticResource InvertConverter}}">
+                    <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center" LastChildFill="True" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted}">
                         <Label Content="{Binding LineConfigurations[1].CurrentValue, FallbackValue=0.00 V}" ContentStringFormat="0.00 V" DockPanel.Dock="Right" />
                         <Slider Minimum="0" Maximum="255" Value="{Binding DAC1Value}" SmallChange="1" LargeChange="10" Margin="5,0" IsEnabled="{Binding Dac1Function, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:DacFunction.User}}" />
+                    </DockPanel>
+
+                </Grid>
+            </Expander>
+
+            <!-- Poti Functions -->
+            <Expander Header="Poti Functions" IsExpanded="True" DockPanel.Dock="Top">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- User -->
+                    <DockPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" LastChildFill="True" Style="{StaticResource DisableableDockPanel}" IsEnabled="{Binding IsStreamStarted}">
+                        <Label Content="{Binding Poti0Value, FallbackValue=0}" ContentStringFormat="0" DockPanel.Dock="Right" Width="20" HorizontalContentAlignment="Right" />
+                        <Slider Minimum="0" Maximum="300" Value="{Binding Poti0Value}" SmallChange="1" LargeChange="10" Margin="5,0" />
                     </DockPanel>
 
                 </Grid>

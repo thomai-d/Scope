@@ -22,7 +22,7 @@ namespace Scope.Interface.Probe
         SetDAC1Buffer       = 0x36,   // '6'   [data: 256 bytes]
         DisableDAC0Buffer   = 0x37,   // '7'
         DisableDAC1Buffer   = 0x38,   // '8'
-        SetPoti0            = 0x39,   // '9'
+        SetPoti0            = 0x39,   // '9'   [data: 2 bytes]
     }
 
     public enum Response

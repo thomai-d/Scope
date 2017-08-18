@@ -44,6 +44,7 @@ namespace Scope.UI.ViewModel
 
         private IBufferedStream<double>[] dacStreams;
         private IBufferedStream<double>[] adcStreams;
+        private IBufferedStream<double> potiStream;
 
         #endregion
 
@@ -75,6 +76,21 @@ namespace Scope.UI.ViewModel
                     _DAC1Value = value;
                     this.RaisePropertyChanged();
                     this.OnDAC1ValueChanged(value);
+                }
+            }
+        }
+
+        private int _Poti0Value;
+        public int Poti0Value
+        {
+            get { return _Poti0Value; }
+            set
+            {
+                if (value != _Poti0Value)
+                {
+                    _Poti0Value = value;
+                    this.RaisePropertyChanged();
+                    this.OnPoti0ValueChanged(value);
                 }
             }
         }
@@ -301,7 +317,7 @@ namespace Scope.UI.ViewModel
             {
                 this.IsStreamStarted = true;
                 this.streamCancellationToken = new CancellationTokenSource();
-                await this.probe.StartStream(this.SamplesPerSecond, this.dacStreams, this.adcStreams, this.streamCancellationToken.Token);
+                await this.probe.StartStream(this.SamplesPerSecond, this.dacStreams, this.adcStreams, this.potiStream, this.streamCancellationToken.Token);
             }
             catch (Exception ex)
             {
@@ -374,6 +390,21 @@ namespace Scope.UI.ViewModel
             }
         }
 
+        private void OnPoti0ValueChanged(int newValue)
+        {
+            try
+            {
+                this.probe.SetPoti0((ushort)newValue);
+            }
+            catch (Exception ex)
+            {
+                this.probe.Dispose();
+                this.IsConnected = false;
+                MessageBox.Show(ex.Message, ex.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+        }
+
         private void OnDacFunctionChanged(byte index, byte prescaler, DacFunction function)
         {
             if (!this.IsConnected)
@@ -429,6 +460,8 @@ namespace Scope.UI.ViewModel
                 config.SetCurrentValueRaw(stream.Last(1)[0]);
             }
 
+            this.ChannelConfigurations[idx++].SetCurrentValueRaw(this.potiStream.Last(1)[0]);
+
             this.RedrawRequested?.Invoke(this, EventArgs.Empty);
         }
 
@@ -463,7 +496,7 @@ namespace Scope.UI.ViewModel
             try
             {
                 var existingChannelConfig = JsonConvert.DeserializeObject<List<ChannelConfiguration>>(Settings.Default.ChannelConfigurations);
-                var totalChannels = Settings.Default.ADCChannels + Settings.Default.DACChannels;
+                var totalChannels = Settings.Default.ADCChannels + Settings.Default.DACChannels + 1; //+1 = Poti
                 if (existingChannelConfig.Count != totalChannels)
                 {
                     // Config does not match total channels. Reset.
@@ -488,6 +521,9 @@ namespace Scope.UI.ViewModel
                     this.adcStreams[n] = new BufferedStream<double>(StreamBufferSize);
                 }
                 this.DataStreams.AddRange(this.adcStreams);
+
+                this.potiStream = new BufferedStream<double>(StreamBufferSize);
+                this.DataStreams.Add(this.potiStream);
             }
             catch
             {
@@ -518,6 +554,10 @@ namespace Scope.UI.ViewModel
                 this.ChannelConfigurations.Add(new ChannelConfiguration($"ADC{n}", palette.NextColor(), 0, 5, "V"));
             }
             this.DataStreams.AddRange(this.adcStreams);
+
+            this.potiStream = new BufferedStream<double>(StreamBufferSize);
+            this.DataStreams.Add(this.potiStream);
+            this.ChannelConfigurations.Add(new ChannelConfiguration($"Poti", palette.NextColor(), 0, 10, "kOhm"));
 
             Settings.Default.ChannelConfigurations = JsonConvert.SerializeObject(this.ChannelConfigurations);
             Settings.Default.Save();

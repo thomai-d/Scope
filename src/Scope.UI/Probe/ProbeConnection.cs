@@ -2,6 +2,7 @@
 using Scope.UI.Properties;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,7 @@ namespace Scope.Interface.Probe
         protected readonly SerialPort port;
 
         private double[] currentDacValues;
+        private ushort currentPotiValue;
         private byte[][] dacBuffers;
         private byte[] dacPrescaler;
 
@@ -91,15 +93,16 @@ namespace Scope.Interface.Probe
             this.ExpectByte((byte)Response.Ack, "DISABLE-BUFFER-ACK");
         }
 
-        public async Task StartStream(int samplesPerSecond, IBufferedStream<double>[] dacStreams, IBufferedStream<double>[] adcStreams, CancellationToken cancellationToken)
+        public async Task StartStream(int samplesPerSecond, IBufferedStream<double>[] dacStreams, IBufferedStream<double>[] adcStreams, IBufferedStream<double> potiStream, CancellationToken cancellationToken)
         {
             var delayuS = (uint)(1000000 / samplesPerSecond);
             var burstSize = (ushort)Math.Min(Math.Max(1, samplesPerSecond / 10), 300); // default: 10 bursts / second.
 
-            // Initialize DACs.
+            // Initialize DACs/Potis.
             var dacBufferPos = new int[dacStreams.Length];
             for (byte n = 0; n < dacStreams.Length; n++)
                 this.SetDAC(n, 0.0);
+            this.SetPoti0(0);
 
             // Start stream.
             this.WriteBytes((byte)Command.StartStream);
@@ -137,6 +140,9 @@ namespace Scope.Interface.Probe
                         dacStreams[dacStreamIndex].Push(this.currentDacValues[dacStreamIndex]);
                     }
                 }
+
+                // Set poti value (0-10k)
+                potiStream.Push((double)this.currentPotiValue / 256.0);
 
                 // Read samples.
                 for (int adcStreamIndex = 0; adcStreamIndex < adcStreams.Length; adcStreamIndex++)
@@ -180,6 +186,16 @@ namespace Scope.Interface.Probe
 
             var value = (byte)(voltage / DACRef * DACmaxValue);
             this.WriteBytes((byte)((byte)Command.SetDAC0 + index), value);
+        }
+
+        public void SetPoti0(ushort value)
+        {
+            if (value > 256)
+                value = 256;
+
+            this.WriteBytes(((byte)Command.SetPoti0));
+            this.WriteWord(value);
+            this.currentPotiValue = value;
         }
 
         public void Dispose()
