@@ -128,7 +128,7 @@ namespace Scope.Interface.Probe
                     if (this.dacBuffers[dacStreamIndex] != null)
                     {
                         // Set the current DAC voltage to the DAC buffer value.
-                        var value = this.dacBuffers[dacStreamIndex][dacBufferPos[dacStreamIndex] / this.dacPrescaler[dacStreamIndex]] / (double)DACmaxValue * DACRef;
+                        var value = this.dacBuffers[dacStreamIndex][dacBufferPos[dacStreamIndex] / this.dacPrescaler[dacStreamIndex]] / (double)DACmaxValue;
                         if (++dacBufferPos[dacStreamIndex] == this.dacBuffers[dacStreamIndex].Length * this.dacPrescaler[dacStreamIndex])
                             dacBufferPos[dacStreamIndex] = 0;
 
@@ -137,12 +137,12 @@ namespace Scope.Interface.Probe
                     else
                     {
                         // Set the current DAC voltage to last known DAC value.
-                        dacStreams[dacStreamIndex].Push(this.currentDacValues[dacStreamIndex]);
+                        dacStreams[dacStreamIndex].Push(this.currentDacValues[dacStreamIndex] / DACRef);
                     }
                 }
 
                 // Set poti value (0-10k)
-                potiStream.Push((double)this.currentPotiValue / 256.0);
+                potiStream.Push(this.currentPotiValue / 256.0);
 
                 // Read samples.
                 for (int adcStreamIndex = 0; adcStreamIndex < adcStreams.Length; adcStreamIndex++)
